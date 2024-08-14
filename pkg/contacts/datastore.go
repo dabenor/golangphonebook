@@ -5,7 +5,7 @@ func addContact() {
 
 }
 
-func getContacts() {
+func getContacts(page int) {
 
 }
 
@@ -15,4 +15,12 @@ func updateContact() {
 
 func deleteContacts() {
 
+}
+
+func mergeDuplicates() {
+
+}
+
+func getSize() int {
+	return 100
 }
