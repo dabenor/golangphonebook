@@ -8,12 +8,13 @@ import (
 
 func main() {
 	// C
-	http.HandleFunc("/", contacts.PutContact)
+	http.HandleFunc("/addContact", contacts.PutContact)
 	// R
-	http.HandleFunc("/contacts", contacts.GetContacts)
+	http.HandleFunc("/getContacts", contacts.GetContacts)
 	// U
-
+	http.HandleFunc("/updateContact", contacts.UpdateContact)
 	// D
-	http.HandleFunc("/delete", contacts.DeleteContacts)
+	http.HandleFunc("/deleteContact", contacts.DeleteContacts)
+
 	http.ListenAndServe(":8080", nil)
 }

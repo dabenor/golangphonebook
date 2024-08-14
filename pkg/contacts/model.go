@@ -2,11 +2,11 @@
 package contacts
 
 type Contact struct {
-	id        int
-	FirstName string
-	LastName  string
-	Phone     string
-	Address   string
+	ID        int    `json:"id"`
+	FirstName string `json:"first_name"`
+	LastName  string `json:"last_name"`
+	Phone     string `json:"phone"`
+	Address   string `json:"address"`
 }
 
 type ContactList struct {

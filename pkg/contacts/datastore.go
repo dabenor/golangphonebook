@@ -9,6 +9,10 @@ func getContacts() {
 
 }
 
+func updateContact() {
+
+}
+
 func deleteContacts() {
 
 }
