@@ -1,1 +1,2 @@
 // Define structures
+package contacts
