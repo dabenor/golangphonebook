@@ -2,14 +2,18 @@
 package main
 
 import (
-    "fmt"
-    "net/http"
+	"golangphonebook/pkg/contacts"
+	"net/http"
 )
 
 func main() {
-    http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-        fmt.Fprintf(w, "Hello, World!")
-    })
+	// C
+	http.HandleFunc("/", contacts.PutContact)
+	// R
+	http.HandleFunc("/contacts", contacts.GetContacts)
+	// U
 
-    http.ListenAndServe(":8080", nil)
+	// D
+	http.HandleFunc("/delete", contacts.DeleteContacts)
+	http.ListenAndServe(":8080", nil)
 }
