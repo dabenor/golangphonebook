@@ -107,6 +107,7 @@ func DeleteContact(w http.ResponseWriter, r *http.Request) {
 	deleteContact(id)
 }
 
+// Helper method(s)
 // Decode JSON body into a Contact
 func decodeBodyToContact(r *http.Request) (*Contact, error) {
 	// Read body from request

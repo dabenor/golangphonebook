@@ -33,6 +33,7 @@ func mergeDuplicates() {
 
 }
 
+// Helper methods
 func getSize() int {
 	return 100
 }
