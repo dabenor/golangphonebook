@@ -14,7 +14,7 @@ func main() {
 	// U
 	http.HandleFunc("/updateContact", contacts.UpdateContact)
 	// D
-	http.HandleFunc("/deleteContact", contacts.DeleteContacts)
+	http.HandleFunc("/deleteContact", contacts.DeleteContact)
 
 	http.ListenAndServe(":8080", nil)
 }

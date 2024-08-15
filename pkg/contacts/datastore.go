@@ -11,6 +11,7 @@ var MyContactList = ContactList{
 
 func addContact(contact Contact) error {
 	internal.Logger.Info("Made it to the add method!")
+	// Check for duplicates here, by same name and phone number
 	return nil
 }
 
@@ -18,12 +19,14 @@ func getContacts(page int) {
 
 }
 
-func updateContact() {
-
+func updateContact(contact Contact) error {
+	internal.Logger.Info("Made it to the update method!")
+	return nil
 }
 
-func deleteContacts() {
-
+func deleteContact(id int) error {
+	internal.Logger.Info("Made it to the delete contact method")
+	return nil
 }
 
 func mergeDuplicates() {

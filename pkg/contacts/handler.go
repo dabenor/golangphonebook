@@ -8,6 +8,7 @@ import (
 	"io"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/go-playground/validator"
 )
@@ -60,13 +61,50 @@ func UpdateContact(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
+
+	contact, err := decodeBodyToContact(r)
+	if err != nil {
+		internal.Logger.Error(fmt.Sprintf("Received invalid body in updateContact method %s", err))
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		return
+	} else {
+		// Require contact ID to address potential duplicate entries in the backend, need to know which contact we're updating
+		if contact.ID == 0 {
+			internal.Logger.Error("Missing Contact ID in request to update contact")
+			http.Error(w, "Invalid request body, missing ID for contact update", http.StatusBadRequest)
+			return
+		}
+		internal.Logger.Info(fmt.Sprintf("Received valid body in updateContact method %s", contact))
+	}
+
+	err = updateContact(*contact)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Failed to update contact to db with error %s", err), http.StatusInternalServerError)
+	}
 }
 
-func DeleteContacts(w http.ResponseWriter, r *http.Request) {
+func DeleteContact(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodDelete {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
+
+	// Extract ID from  URL path /deleteContact/{id}
+	parts := strings.Split(r.URL.Path, "/")
+	if len(parts) < 3 {
+		http.Error(w, "Invalid URL, ID is missing", http.StatusBadRequest)
+		return
+	}
+
+	id, err := strconv.Atoi(parts[2])
+
+	if err != nil {
+		http.Error(w, "Invalid ID, IDs can only be integers", http.StatusBadRequest)
+		return
+	}
+	internal.Logger.Info(fmt.Sprintf("ID detected is %d", id))
+
+	deleteContact(id)
 }
 
 // Decode JSON body into a Contact
