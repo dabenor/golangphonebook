@@ -8,17 +8,12 @@ import (
 	"io"
 	"net/http"
 	"strconv"
-	"strings"
 
 	"github.com/go-playground/validator"
+	"github.com/gorilla/mux"
 )
 
 func PutContact(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPut {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
 	contact, err := decodeBodyToContact(r)
 	if err != nil {
 		internal.Logger.Error(fmt.Sprintf("Received invalid body in addContact method %s", err))
@@ -37,10 +32,6 @@ func PutContact(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetContacts(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodGet {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
 	// default page is page 1
 	page := 1
 
@@ -57,11 +48,6 @@ func GetContacts(w http.ResponseWriter, r *http.Request) {
 }
 
 func UpdateContact(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
 	contact, err := decodeBodyToContact(r)
 	if err != nil {
 		internal.Logger.Error(fmt.Sprintf("Received invalid body in updateContact method %s", err))
@@ -84,19 +70,9 @@ func UpdateContact(w http.ResponseWriter, r *http.Request) {
 }
 
 func DeleteContact(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodDelete {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
 	// Extract ID from  URL path /deleteContact/{id}
-	parts := strings.Split(r.URL.Path, "/")
-	if len(parts) < 3 {
-		http.Error(w, "Invalid URL, ID is missing", http.StatusBadRequest)
-		return
-	}
-
-	id, err := strconv.Atoi(parts[2])
+	vars := mux.Vars(r)
+	id, err := strconv.Atoi(vars["id"])
 
 	if err != nil {
 		http.Error(w, "Invalid ID, IDs can only be integers", http.StatusBadRequest)

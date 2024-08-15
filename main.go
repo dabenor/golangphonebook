@@ -4,17 +4,22 @@ package main
 import (
 	"golangphonebook/pkg/contacts"
 	"net/http"
+
+	"github.com/gorilla/mux"
 )
 
 func main() {
+	router := mux.NewRouter()
 	// C
-	http.HandleFunc("/addContact", contacts.PutContact)
+	router.HandleFunc("/addContact", contacts.PutContact).Methods("PUT")
 	// R
-	http.HandleFunc("/getContacts", contacts.GetContacts)
+	router.HandleFunc("/getContacts", contacts.GetContacts).Methods("GET")
 	// U
-	http.HandleFunc("/updateContact", contacts.UpdateContact)
+	router.HandleFunc("/updateContact", contacts.UpdateContact).Methods("POST")
 	// D
-	http.HandleFunc("/deleteContact", contacts.DeleteContact)
+	router.HandleFunc("/deleteContact/{id}", contacts.DeleteContact).Methods("DELETE")
+	// Add router for dynamic routes
+	http.Handle("/", router)
 
 	http.ListenAndServe(":8080", nil)
 }
