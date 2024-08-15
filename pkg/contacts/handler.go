@@ -18,20 +18,13 @@ func PutContact(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Decode to map
-	var requestBody map[string]string
-	if err := json.NewDecoder(r.Body).Decode(&requestBody); err != nil && err.Error() != "EOF" {
-		http.Error(w, "Invalid body", http.StatusBadRequest)
-		return
-	}
-
 	contact, err := decodeBodyToContact(r)
 	if err != nil {
-		internal.Logger.Error(fmt.Sprintf("Received invalid body in addContact method %s", requestBody))
+		internal.Logger.Error(fmt.Sprintf("Received invalid body in addContact method %s", err))
 		http.Error(w, "Invalid request body", http.StatusBadRequest)
 		return
 	} else {
-		internal.Logger.Info(fmt.Sprintf("Received valid body in addContact method %s", requestBody))
+		internal.Logger.Info(fmt.Sprintf("Received valid body in addContact method %s", err))
 	}
 
 	err = addContact(*contact)
@@ -76,21 +69,6 @@ func DeleteContacts(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func parseContact(rawJSON []byte) (*Contact, error) {
-	var contact Contact
-
-	// Unmarshal the raw JSON into the Contact struct
-	err := json.Unmarshal(rawJSON, &contact)
-	if err != nil {
-		internal.Logger.Error(fmt.Sprintf("error parsing JSON: %v", err))
-
-		return nil, fmt.Errorf("error parsing JSON: %v", err)
-	}
-
-	// Return the populated Contact object
-	return &contact, nil
-}
-
 // Decode JSON body into a Contact
 func decodeBodyToContact(r *http.Request) (*Contact, error) {
 	// Read body from request
@@ -100,6 +78,7 @@ func decodeBodyToContact(r *http.Request) (*Contact, error) {
 		return nil, fmt.Errorf("unable to read request body: %v", err)
 	}
 	defer r.Body.Close()
+	internal.Logger.Info(fmt.Sprintf("Received JSON: %s", string(body)))
 
 	// Decode JSON body into a Contact
 	var contact Contact
