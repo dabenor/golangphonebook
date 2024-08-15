@@ -24,7 +24,7 @@ func PutContact(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Invalid request body", http.StatusBadRequest)
 		return
 	} else {
-		internal.Logger.Info(fmt.Sprintf("Received valid body in addContact method %s", err))
+		internal.Logger.Info(fmt.Sprintf("Received valid body in addContact method %s", contact))
 	}
 
 	err = addContact(*contact)

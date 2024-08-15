@@ -2,6 +2,7 @@
 package contacts
 
 import (
+	"fmt"
 	"golangphonebook/internal"
 	"regexp"
 
@@ -19,6 +20,11 @@ type Contact struct {
 type ContactList struct {
 	contacts []Contact
 	count    int
+}
+
+func (c Contact) String() string {
+	return fmt.Sprintf("Contact(ID=%d, FirstName=%s, LastName=%s, Phone=%s, Address=%s)",
+		c.ID, c.FirstName, c.LastName, c.Phone, c.Address)
 }
 
 // Structure validator
