@@ -2,21 +2,23 @@
 # syntax=docker/dockerfile:1
 FROM golang:1.23
 
-# Set destination for COPY
+# Set the working directory inside the container
 WORKDIR /app
 
-# Download Go modules
+# Copy go.mod and go.sum files
 COPY go.mod go.sum ./
+
+# Download Go modules
 RUN go mod download
 
-# Copy the source code
-COPY *.go ./
+# Copy the entire project directory into the container
+COPY . .
 
-# Build
+# Build the Go application
 RUN CGO_ENABLED=0 GOOS=linux go build -o /docker-phonebook
 
-# Bind to a TCP Port
+# Expose the port the app will run on
 EXPOSE 8080
 
-# Run
+# Run the application
 CMD ["/docker-phonebook"]
