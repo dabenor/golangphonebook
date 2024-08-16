@@ -34,10 +34,10 @@ type ContactDBService struct {
 
 // DB interaction interface
 type ContactRepository interface {
-	addContact(contact Contact) error
-	getContacts(page int) error
-	updateContact(contact Contact) error
-	deleteContact(id int) error
+	AddContact(contact Contact) error
+	GetContacts(page int) error
+	UpdateContact(contact Contact) error
+	DeleteContact(id int) error
 }
 
 // Structure validator

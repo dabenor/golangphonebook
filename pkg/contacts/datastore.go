@@ -21,24 +21,24 @@ func NewSQLContactRepository(db *sql.DB) *SQLContactRepository {
 	return &SQLContactRepository{DB: db}
 }
 
-func (repo *SQLContactRepository) addContact(contact Contact) error {
+func (repo *SQLContactRepository) AddContact(contact Contact) error {
 	query := `INSERT INTO contacts (first_name, last_name, phone, address) VALUES (?, ?, ?, ?)`
 	_, err := repo.DB.Exec(query, contact.FirstName, contact.LastName, contact.Phone, contact.Address)
 	return err
 }
 
-func (repo *SQLContactRepository) getContacts(page int) error {
+func (repo *SQLContactRepository) GetContacts(page int) error {
 	internal.Logger.Info("Made it to getContacts")
 	return nil
 
 }
 
-func (repo *SQLContactRepository) updateContact(contact Contact) error {
+func (repo *SQLContactRepository) UpdateContact(contact Contact) error {
 	internal.Logger.Info("Made it to the update method!")
 	return nil
 }
 
-func (repo *SQLContactRepository) deleteContact(id int) error {
+func (repo *SQLContactRepository) DeleteContact(id int) error {
 	internal.Logger.Info("Made it to the delete contact method")
 	return nil
 }

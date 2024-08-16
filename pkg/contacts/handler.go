@@ -23,7 +23,7 @@ func PutContact(w http.ResponseWriter, r *http.Request, repo ContactRepository) 
 		internal.Logger.Info(fmt.Sprintf("Received valid body in addContact method %s", contact))
 	}
 
-	err = repo.addContact(*contact)
+	err = repo.AddContact(*contact)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Failed to insert contact to db with error %s", err), http.StatusInternalServerError)
 	}
@@ -44,7 +44,7 @@ func GetContacts(w http.ResponseWriter, r *http.Request, repo ContactRepository)
 		}
 	}
 
-	repo.getContacts(page)
+	repo.GetContacts(page)
 }
 
 func UpdateContact(w http.ResponseWriter, r *http.Request, repo ContactRepository) {
@@ -63,7 +63,7 @@ func UpdateContact(w http.ResponseWriter, r *http.Request, repo ContactRepositor
 		internal.Logger.Info(fmt.Sprintf("Received valid body in updateContact method %s", contact))
 	}
 
-	err = repo.updateContact(*contact)
+	err = repo.UpdateContact(*contact)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Failed to update contact to db with error %s", err), http.StatusInternalServerError)
 	}
@@ -80,7 +80,7 @@ func DeleteContact(w http.ResponseWriter, r *http.Request, repo ContactRepositor
 	}
 	internal.Logger.Info(fmt.Sprintf("ID detected is %d", id))
 
-	repo.deleteContact(id)
+	repo.DeleteContact(id)
 }
 
 // Helper method(s)

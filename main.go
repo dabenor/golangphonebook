@@ -3,6 +3,7 @@ package main
 
 import (
 	"database/sql"
+	"fmt"
 	"golangphonebook/internal"
 	"golangphonebook/pkg/contacts"
 	"net/http"
@@ -16,7 +17,7 @@ func main() {
 	connStr := "user=username password=password dbname=mydb sslmode=disable"
 	db, err := sql.Open("postgres", connStr)
 	if err != nil {
-		internal.Logger.Error("DB connection init failed, shutting down: %s", err)
+		internal.Logger.Error(fmt.Sprintf("DB connection init failed, shutting down: %s", err))
 		return
 	}
 	defer db.Close()
