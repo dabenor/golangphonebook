@@ -2,7 +2,7 @@ services:
   db:
     image: postgres:latest
     environment:
-      POSTGRES_DB: mydb
+      POSTGRES_DB: contacts
       POSTGRES_USER: myuser
       POSTGRES_PASSWORD: mypassword
     volumes:
@@ -21,7 +21,7 @@ services:
       DB_PORT: 5432
       DB_USER: myuser
       DB_PASSWORD: mypassword
-      DB_NAME: mydb
+      DB_NAME: contacts
     ports:
       - "8080:8080"
     volumes:

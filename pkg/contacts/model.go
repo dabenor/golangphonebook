@@ -10,11 +10,11 @@ import (
 )
 
 type Contact struct {
-	ID        int    `json:"id"`
-	FirstName string `json:"first_name" validate:"required"`
-	LastName  string `json:"last_name"`
-	Phone     string `json:"phone" validate:"required,customPhone"`
-	Address   string `json:"address"`
+	ID        uint   `json:"id" gorm:"primaryKey;autoIncrement;index:idx_first_last,priority:3;index:idx_last_first,priority:3"` // Auto-incrementing primary key
+	FirstName string `json:"first_name" validate:"required" gorm:"size:50;not null;index:idx_first_last,priority:1"`             // Index on FirstName with LastName and ID
+	LastName  string `json:"last_name" gorm:"size:50;index:idx_first_last,priority:2;index:idx_last_first,priority:1"`           // Index on LastName with FirstName and ID
+	Phone     string `json:"phone" validate:"required,customPhone" gorm:"size:20"`                                               // Phone field with validation and size constraint
+	Address   string `json:"address" gorm:"size:100;type:text"`                                                                  // Address field, stored as text in the database
 }
 
 type ContactList struct {
