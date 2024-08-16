@@ -33,7 +33,9 @@ func (repo *SQLContactRepository) AddContact(contact Contact) error {
 		// Contact already exists
 		internal.Logger.Warn("contact with the same full name and phone number already exists")
 		return errors.New("contact with the same full name and phone number already exists")
-	} else if errors.Is(err, gorm.ErrRecordNotFound) {
+	}
+
+	if errors.Is(err, gorm.ErrRecordNotFound) {
 		// Contact does not exist
 		err = repo.DB.Create(&contact).Error
 		return err
@@ -42,9 +44,6 @@ func (repo *SQLContactRepository) AddContact(contact Contact) error {
 		return err
 
 	}
-
-	// If the contact doesn't exist, create a new one
-
 }
 
 func (repo *SQLContactRepository) GetContacts(page int) error {
@@ -81,7 +80,16 @@ func (repo *SQLContactRepository) UpdateContact(contact Contact) error {
 }
 
 func (repo *SQLContactRepository) DeleteContact(id int) error {
-	internal.Logger.Info("Made it to the delete contact method")
+	result := repo.DB.Delete(&Contact{}, id)
+	if result.Error != nil {
+		return result.Error
+	}
+	if result.RowsAffected == 0 {
+		return errors.New("no contact found with the given ID")
+	}
+
+	internal.Logger.Info(fmt.Sprintf("Contact deleted successfully, %d row(s) affected", result.RowsAffected))
+
 	return nil
 }
 

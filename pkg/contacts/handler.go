@@ -25,8 +25,17 @@ func PutContact(w http.ResponseWriter, r *http.Request, repo ContactRepository) 
 
 	err = repo.AddContact(*contact)
 	if err != nil {
-		http.Error(w, fmt.Sprintf("Failed to insert contact to db with error %s", err), http.StatusInternalServerError)
+		if err.Error() == "contact with the same full name and phone number already exists" {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+		} else {
+			http.Error(w, fmt.Sprintf("Failed to insert contact to db with error %v", err), http.StatusInternalServerError)
+		}
+		return
 	}
+
+	internal.Logger.Info("Contact added to DB successfully")
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("Contact added to DB successfully"))
 
 	// Return an updated first page, maybe. Return contact itself. Or when user adds a contact, send them back to their origin page, or to page 1 of their contacts
 }
@@ -84,7 +93,19 @@ func DeleteContact(w http.ResponseWriter, r *http.Request, repo ContactRepositor
 	}
 	internal.Logger.Info(fmt.Sprintf("ID detected is %d", id))
 
-	repo.DeleteContact(id)
+	err = repo.DeleteContact(id)
+	if err != nil {
+		if err.Error() == "no contact found with the given ID" {
+			http.Error(w, err.Error(), http.StatusNotFound)
+		} else {
+			http.Error(w, "Failed to delete contact", http.StatusInternalServerError)
+		}
+		return
+	}
+
+	internal.Logger.Info("Contact deleted successfully")
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("Contact deleted successfully"))
 }
 
 // Helper method(s)
