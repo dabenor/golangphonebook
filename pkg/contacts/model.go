@@ -27,6 +27,19 @@ func (c Contact) String() string {
 		c.ID, c.FirstName, c.LastName, c.Phone, c.Address)
 }
 
+// Service interface
+type ContactDBService struct {
+	repo ContactRepository
+}
+
+// DB interaction interface
+type ContactRepository interface {
+	addContact(contact Contact) error
+	getContacts(page int) error
+	updateContact(contact Contact) error
+	deleteContact(id int) error
+}
+
 // Structure validator
 var validate *validator.Validate
 

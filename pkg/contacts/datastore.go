@@ -1,7 +1,10 @@
 // Handle CRUD ops for the database
 package contacts
 
-import "golangphonebook/internal"
+import (
+	"database/sql"
+	"golangphonebook/internal"
+)
 
 // Initialize contact list as slice, temporary solution for now
 var MyContactList = ContactList{
@@ -9,22 +12,33 @@ var MyContactList = ContactList{
 	count:    0,
 }
 
-func addContact(contact Contact) error {
-	internal.Logger.Info("Made it to the add method!")
-	// Check for duplicates here, by same name and phone number
+type SQLContactRepository struct {
+	DB *sql.DB
+}
+
+// NewSQLContactRepository creates a new instance of SQLContactRepository
+func NewSQLContactRepository(db *sql.DB) *SQLContactRepository {
+	return &SQLContactRepository{DB: db}
+}
+
+func (repo *SQLContactRepository) addContact(contact Contact) error {
+	query := `INSERT INTO contacts (first_name, last_name, phone, address) VALUES (?, ?, ?, ?)`
+	_, err := repo.DB.Exec(query, contact.FirstName, contact.LastName, contact.Phone, contact.Address)
+	return err
+}
+
+func (repo *SQLContactRepository) getContacts(page int) error {
+	internal.Logger.Info("Made it to getContacts")
 	return nil
-}
-
-func getContacts(page int) {
 
 }
 
-func updateContact(contact Contact) error {
+func (repo *SQLContactRepository) updateContact(contact Contact) error {
 	internal.Logger.Info("Made it to the update method!")
 	return nil
 }
 
-func deleteContact(id int) error {
+func (repo *SQLContactRepository) deleteContact(id int) error {
 	internal.Logger.Info("Made it to the delete contact method")
 	return nil
 }

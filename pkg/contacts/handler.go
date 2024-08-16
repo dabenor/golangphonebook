@@ -13,7 +13,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func PutContact(w http.ResponseWriter, r *http.Request) {
+func PutContact(w http.ResponseWriter, r *http.Request, repo ContactRepository) {
 	contact, err := decodeBodyToContact(r)
 	if err != nil {
 		internal.Logger.Error(fmt.Sprintf("Received invalid body in addContact method %s", err))
@@ -23,7 +23,7 @@ func PutContact(w http.ResponseWriter, r *http.Request) {
 		internal.Logger.Info(fmt.Sprintf("Received valid body in addContact method %s", contact))
 	}
 
-	err = addContact(*contact)
+	err = repo.addContact(*contact)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Failed to insert contact to db with error %s", err), http.StatusInternalServerError)
 	}
@@ -31,7 +31,7 @@ func PutContact(w http.ResponseWriter, r *http.Request) {
 	// Return an updated first page, maybe. Return contact itself. Or when user adds a contact, send them back to their origin page, or to page 1 of their contacts
 }
 
-func GetContacts(w http.ResponseWriter, r *http.Request) {
+func GetContacts(w http.ResponseWriter, r *http.Request, repo ContactRepository) {
 	// default page is page 1
 	page := 1
 
@@ -44,10 +44,10 @@ func GetContacts(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	getContacts(page)
+	repo.getContacts(page)
 }
 
-func UpdateContact(w http.ResponseWriter, r *http.Request) {
+func UpdateContact(w http.ResponseWriter, r *http.Request, repo ContactRepository) {
 	contact, err := decodeBodyToContact(r)
 	if err != nil {
 		internal.Logger.Error(fmt.Sprintf("Received invalid body in updateContact method %s", err))
@@ -63,13 +63,13 @@ func UpdateContact(w http.ResponseWriter, r *http.Request) {
 		internal.Logger.Info(fmt.Sprintf("Received valid body in updateContact method %s", contact))
 	}
 
-	err = updateContact(*contact)
+	err = repo.updateContact(*contact)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Failed to update contact to db with error %s", err), http.StatusInternalServerError)
 	}
 }
 
-func DeleteContact(w http.ResponseWriter, r *http.Request) {
+func DeleteContact(w http.ResponseWriter, r *http.Request, repo ContactRepository) {
 	// Extract ID from  URL path /deleteContact/{id}
 	vars := mux.Vars(r)
 	id, err := strconv.Atoi(vars["id"])
@@ -80,7 +80,7 @@ func DeleteContact(w http.ResponseWriter, r *http.Request) {
 	}
 	internal.Logger.Info(fmt.Sprintf("ID detected is %d", id))
 
-	deleteContact(id)
+	repo.deleteContact(id)
 }
 
 // Helper method(s)
