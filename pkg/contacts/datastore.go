@@ -2,6 +2,8 @@
 package contacts
 
 import (
+	"errors"
+	"fmt"
 	"golangphonebook/internal"
 
 	"gorm.io/gorm"
@@ -23,14 +25,54 @@ func NewSQLContactRepository(db *gorm.DB) *SQLContactRepository {
 }
 
 func (repo *SQLContactRepository) AddContact(contact Contact) error {
-	err := repo.DB.Create(&contact).Error
-	return err
+	var existingContact Contact
+
+	// Check if a contact with the same FirstName, LastName and Phone already exists
+	err := repo.DB.Where("first_name = ? AND last_name = ? AND phone = ?", contact.FirstName, contact.LastName, contact.Phone).First(&existingContact).Error
+	if err == nil {
+		// Contact already exists
+		internal.Logger.Warn("contact with the same full name and phone number already exists")
+		return errors.New("contact with the same full name and phone number already exists")
+	} else if errors.Is(err, gorm.ErrRecordNotFound) {
+		// Contact does not exist
+		err = repo.DB.Create(&contact).Error
+		return err
+	} else {
+		// We got some other error
+		return err
+
+	}
+
+	// If the contact doesn't exist, create a new one
+
 }
 
 func (repo *SQLContactRepository) GetContacts(page int) error {
 	internal.Logger.Info("Made it to getContacts")
 	return nil
 
+}
+
+func (repo *SQLContactRepository) GetContact(contact Contact) error {
+	internal.Logger.Info("Made it to getContacts")
+	return nil
+
+}
+
+func (repo *SQLContactRepository) GetAllContacts() {
+	var contacts []Contact
+
+	// Query the database to retrieve all contacts
+	err := repo.DB.Find(&contacts).Error
+	if err != nil {
+		internal.Logger.Error(fmt.Sprintf("Error on getting contacts %v", err))
+	}
+
+	internal.Logger.Info(fmt.Sprintf("Retrieved %d contacts", len(contacts)))
+	for _, contact := range contacts {
+		fmt.Println(contact)
+	}
+	return
 }
 
 func (repo *SQLContactRepository) UpdateContact(contact Contact) error {

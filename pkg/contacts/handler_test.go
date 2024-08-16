@@ -27,6 +27,10 @@ func (m *MockContactRepository) GetContacts(page int) error {
 	return nil
 }
 
+func (m *MockContactRepository) GetAllContacts() {
+	return
+}
+
 func (m *MockContactRepository) UpdateContact(contact contacts.Contact) error {
 	return nil
 }

@@ -47,6 +47,10 @@ func GetContacts(w http.ResponseWriter, r *http.Request, repo ContactRepository)
 	repo.GetContacts(page)
 }
 
+func GetAllContacts(w http.ResponseWriter, r *http.Request, repo ContactRepository) {
+	repo.GetAllContacts()
+}
+
 func UpdateContact(w http.ResponseWriter, r *http.Request, repo ContactRepository) {
 	contact, err := decodeBodyToContact(r)
 	if err != nil {

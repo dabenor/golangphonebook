@@ -36,6 +36,7 @@ type ContactDBService struct {
 type ContactRepository interface {
 	AddContact(contact Contact) error
 	GetContacts(page int) error
+	GetAllContacts()
 	UpdateContact(contact Contact) error
 	DeleteContact(id int) error
 }
