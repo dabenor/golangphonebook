@@ -27,11 +27,6 @@ func (c Contact) String() string {
 		c.ID, c.FirstName, c.LastName, c.Phone, c.Address)
 }
 
-// Service interface
-type ContactDBService struct {
-	repo ContactRepository
-}
-
 // DB interaction interface
 type ContactRepository interface {
 	AddContact(contact Contact) error
