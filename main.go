@@ -19,7 +19,6 @@ func main() {
 		internal.Logger.Error(fmt.Sprintf("DB connection init failed, shutting down: %s", err))
 		return
 	}
-	defer db.Close()
 
 	// Initialize the db interaction functions
 	repo := contacts.NewSQLContactRepository(db)

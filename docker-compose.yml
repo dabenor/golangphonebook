@@ -2,20 +2,26 @@ services:
   db:
     image: postgres:latest
     environment:
+      PGDATA: /var/lib/postgresql/data/db_data/
       POSTGRES_DB: contacts
       POSTGRES_USER: myuser
       POSTGRES_PASSWORD: mypassword
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./db/pg_hba.conf:/var/lib/postgresql/data/pg_hba.conf
+      - ./db/pg_hba.conf:/etc/postgresql/pg_hba.conf
     ports:
       - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U myuser -d contacts"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
   # Env vars defined here since it's a local instance, for production would store these elsewhere
   app:
     build: .
-    command: ["/docker-phonebook"]
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     environment:
       DB_HOST: db
       DB_PORT: 5432

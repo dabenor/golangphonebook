@@ -2,8 +2,9 @@
 package contacts
 
 import (
-	"database/sql"
 	"golangphonebook/internal"
+
+	"gorm.io/gorm"
 )
 
 // Initialize contact list as slice, temporary solution for now
@@ -13,17 +14,16 @@ var MyContactList = ContactList{
 }
 
 type SQLContactRepository struct {
-	DB *sql.DB
+	DB *gorm.DB
 }
 
 // NewSQLContactRepository creates a new instance of SQLContactRepository
-func NewSQLContactRepository(db *sql.DB) *SQLContactRepository {
+func NewSQLContactRepository(db *gorm.DB) *SQLContactRepository {
 	return &SQLContactRepository{DB: db}
 }
 
 func (repo *SQLContactRepository) AddContact(contact Contact) error {
-	query := `INSERT INTO contacts (first_name, last_name, phone, address) VALUES (?, ?, ?, ?)`
-	_, err := repo.DB.Exec(query, contact.FirstName, contact.LastName, contact.Phone, contact.Address)
+	err := repo.DB.Create(&contact).Error
 	return err
 }
 
