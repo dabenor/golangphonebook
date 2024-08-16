@@ -5,9 +5,9 @@ services:
       POSTGRES_DB: mydb
       POSTGRES_USER: myuser
       POSTGRES_PASSWORD: mypassword
-      POSTGRES_HOST_AUTH_METHOD: trust
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./db/pg_hba.conf:/var/lib/postgresql/data/pg_hba.conf
     ports:
       - "5432:5432"
   # Env vars defined here since it's a local instance, for production would store these elsewhere
