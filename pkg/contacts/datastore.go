@@ -52,6 +52,7 @@ func (repo *SQLContactRepository) GetContact(contact Contact) error {
 
 }
 
+// TODO: remove this method
 func (repo *SQLContactRepository) GetAllContacts() {
 	var contacts []Contact
 
@@ -65,7 +66,6 @@ func (repo *SQLContactRepository) GetAllContacts() {
 	for _, contact := range contacts {
 		fmt.Println(contact)
 	}
-	return
 }
 
 func (repo *SQLContactRepository) UpdateContact(id int, updatedContact Contact) error {

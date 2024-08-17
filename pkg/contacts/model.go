@@ -20,11 +20,6 @@ type Contact struct {
 
 }
 
-type ContactList struct {
-	contacts []Contact
-	count    int
-}
-
 func (c Contact) String() string {
 	if c.LastModified.IsZero() {
 		return fmt.Sprintf("Contact(ID=%d, FirstName=%s, LastName=%s, Phone=%s, Address=%s)",
