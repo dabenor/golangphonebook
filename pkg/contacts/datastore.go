@@ -74,8 +74,42 @@ func (repo *SQLContactRepository) GetAllContacts() {
 	return
 }
 
-func (repo *SQLContactRepository) UpdateContact(id int, contact Contact) error {
-	internal.Logger.Info("Made it to the update method!")
+func (repo *SQLContactRepository) UpdateContact(id int, updatedContact Contact) error {
+	// Check if contact exists
+	var existingContact Contact
+	err := repo.DB.First(&existingContact, id).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return errors.New("contact not found")
+		}
+		return err
+	}
+
+	// Check for duplicate contact
+	var duplicateContact Contact
+	err = repo.DB.Where("first_name = ? AND last_name = ? AND id != ? AND phone = ?",
+		updatedContact.FirstName, updatedContact.LastName, id, updatedContact.Phone).First(&duplicateContact).Error
+	if err == nil {
+		// Duplicate exists
+		return errors.New("another contact with the same first name, last name, and phone number already exists")
+	} else if !errors.Is(err, gorm.ErrRecordNotFound) {
+		// Some other error
+		return err
+	}
+	// Update fields
+	existingContact.FirstName = updatedContact.FirstName
+	existingContact.LastName = updatedContact.LastName
+	existingContact.Phone = updatedContact.Phone
+	existingContact.Address = updatedContact.Address
+
+	// Save contact back to db
+	err = repo.DB.Save(&existingContact).Error
+	if err != nil {
+		internal.Logger.Error(fmt.Sprintf("Encountered err while saving updated contact back to DB: %v", err))
+		return err
+	}
+
+	internal.Logger.Info(fmt.Sprintf("Contact with ID %d updated successfully", id))
 	return nil
 }
 
