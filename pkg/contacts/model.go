@@ -26,8 +26,13 @@ type ContactList struct {
 }
 
 func (c Contact) String() string {
-	return fmt.Sprintf("Contact(ID=%d, FirstName=%s, LastName=%s, Phone=%s, Address=%s, LastModified=%s)",
-		c.ID, c.FirstName, c.LastName, c.Phone, c.Address, c.LastModified)
+	if c.LastModified.IsZero() {
+		return fmt.Sprintf("Contact(ID=%d, FirstName=%s, LastName=%s, Phone=%s, Address=%s)",
+			c.ID, c.FirstName, c.LastName, c.Phone, c.Address)
+	} else {
+		return fmt.Sprintf("Contact(ID=%d, FirstName=%s, LastName=%s, Phone=%s, Address=%s, LastModified=%s)",
+			c.ID, c.FirstName, c.LastName, c.Phone, c.Address, c.LastModified)
+	}
 }
 
 // DB interaction interface
