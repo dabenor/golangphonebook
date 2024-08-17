@@ -81,10 +81,24 @@ func UpdateContact(w http.ResponseWriter, r *http.Request, repo ContactRepositor
 
 	internal.Logger.Info(fmt.Sprintf("Received valid body in updateContact method %s", contact))
 
+	// Update contact in db
 	err = repo.UpdateContact(id, *contact)
 	if err != nil {
-		http.Error(w, fmt.Sprintf("Failed to update contact to db with error %s", err), http.StatusInternalServerError)
+		// Handle duplicate data error
+		if err.Error() == "another contact with the same first name, last name, and phone number already exists" {
+			internal.Logger.Error(fmt.Sprintf("Duplicate data error: %s", err))
+			http.Error(w, "Duplicate contact with the same first name, last name, and phone number already exists", http.StatusBadRequest)
+			return
+		}
+		// Handle other errors as internal server errors
+		internal.Logger.Error(fmt.Sprintf("Failed to update contact to db: %s", err))
+		http.Error(w, "Failed to update contact due to an internal server error", http.StatusInternalServerError)
+		return
 	}
+
+	internal.Logger.Info(fmt.Sprintf("Contact with ID %d updated successfully", id))
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("Contact updated successfully"))
 }
 
 func DeleteContact(w http.ResponseWriter, r *http.Request, repo ContactRepository) {
