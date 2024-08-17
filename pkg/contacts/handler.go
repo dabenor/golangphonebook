@@ -14,7 +14,7 @@ import (
 )
 
 func PutContact(w http.ResponseWriter, r *http.Request, repo ContactRepository) {
-	defer internal.Timer("PutContact")
+	defer internal.Timer("PutContact")()
 
 	contact, err := decodeBodyToContact(r)
 	if err != nil {
@@ -38,7 +38,6 @@ func PutContact(w http.ResponseWriter, r *http.Request, repo ContactRepository) 
 	internal.Logger.Info("Contact added to DB successfully")
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("Contact added to DB successfully"))
-
 	// Return an updated first page, maybe. Return contact itself. Or when user adds a contact, send them back to their origin page, or to page 1 of their contacts
 }
 
@@ -89,7 +88,7 @@ func UpdateContact(w http.ResponseWriter, r *http.Request, repo ContactRepositor
 }
 
 func DeleteContact(w http.ResponseWriter, r *http.Request, repo ContactRepository) {
-	defer internal.Timer("DeleteContact")
+	defer internal.Timer("DeleteContact")()
 
 	// Extract ID from  URL path /deleteContact/{id}
 	vars := mux.Vars(r)
