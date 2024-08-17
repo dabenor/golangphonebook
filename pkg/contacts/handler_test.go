@@ -39,6 +39,10 @@ func (m *MockContactRepository) DeleteContact(id int) error {
 	return nil
 }
 
+func (m *MockContactRepository) GetContactCount() (int64, error) {
+	return 0, nil
+}
+
 func TestPutContact(t *testing.T) {
 	tests := []struct {
 		name               string

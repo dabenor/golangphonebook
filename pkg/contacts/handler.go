@@ -47,7 +47,8 @@ func GetContacts(w http.ResponseWriter, r *http.Request, repo ContactRepository)
 
 	pageHeader := r.Header.Get("page")
 	if parsedPage, err := strconv.Atoi(pageHeader); err == nil {
-		if parsedPage >= 1 && parsedPage <= getSize()/11+1 {
+		// TODO: Add logic for upper bound of parsed page: Old logic && parsedPage <= repo.GetContactCount()/11+1
+		if parsedPage >= 1 {
 			page = parsedPage
 		} else {
 			internal.Logger.Warn("Invalid page number, defaulting to page 1")

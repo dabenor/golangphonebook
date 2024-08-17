@@ -42,6 +42,7 @@ type ContactRepository interface {
 	GetAllContacts()
 	UpdateContact(id int, contact Contact) error
 	DeleteContact(id int) error
+	GetContactCount() (int64, error)
 }
 
 // Structure validator

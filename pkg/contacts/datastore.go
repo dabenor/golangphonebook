@@ -9,12 +9,6 @@ import (
 	"gorm.io/gorm"
 )
 
-// Initialize contact list as slice, temporary solution for now
-var MyContactList = ContactList{
-	contacts: []Contact{},
-	count:    0,
-}
-
 type SQLContactRepository struct {
 	DB *gorm.DB
 }
@@ -97,10 +91,18 @@ func (repo *SQLContactRepository) UpdateContact(id int, updatedContact Contact) 
 		return err
 	}
 	// Update fields
-	existingContact.FirstName = updatedContact.FirstName
-	existingContact.LastName = updatedContact.LastName
-	existingContact.Phone = updatedContact.Phone
-	existingContact.Address = updatedContact.Address
+	if updatedContact.FirstName != "" {
+		existingContact.FirstName = updatedContact.FirstName
+	}
+	if updatedContact.LastName != "" {
+		existingContact.LastName = updatedContact.LastName
+	}
+	if updatedContact.Phone != "" {
+		existingContact.Phone = updatedContact.Phone
+	}
+	if updatedContact.Address != "" {
+		existingContact.Address = updatedContact.Address
+	}
 
 	// Save contact back to db
 	err = repo.DB.Save(&existingContact).Error
@@ -132,8 +134,13 @@ func mergeDuplicates() {
 }
 
 // Helper methods
-func getSize() int {
-	return 100
+func (repo *SQLContactRepository) GetContactCount() (int64, error) {
+	var count int64
+	err := repo.DB.Model(&Contact{}).Count(&count).Error
+	if err != nil {
+		return 0, err
+	}
+	return count, nil
 }
 
 func contactExists() bool {
