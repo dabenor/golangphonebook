@@ -36,5 +36,6 @@ func main() {
 	// Add router for dynamic routes
 	http.Handle("/", router)
 
+	internal.Logger.Info("Ready to take requests:\n")
 	http.ListenAndServe(":8080", nil)
 }

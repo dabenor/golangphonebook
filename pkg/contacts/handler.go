@@ -9,7 +9,6 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/go-playground/validator"
 	"github.com/gorilla/mux"
 )
 
@@ -19,7 +18,7 @@ func PutContact(w http.ResponseWriter, r *http.Request, repo ContactRepository) 
 	contact, err := decodeBodyToContact(r)
 	if err != nil {
 		internal.Logger.Error(fmt.Sprintf("Received invalid body in addContact method %s", err))
-		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		http.Error(w, "Invalid request body, first name and phone must be correctly defined", http.StatusBadRequest)
 		return
 	} else {
 		internal.Logger.Info(fmt.Sprintf("Received valid body in addContact method %s", contact))
@@ -97,7 +96,6 @@ func UpdateContact(w http.ResponseWriter, r *http.Request, repo ContactRepositor
 		return
 	}
 
-	internal.Logger.Info(fmt.Sprintf("Contact with ID %d updated successfully", id))
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("Contact updated successfully"))
 }
@@ -151,17 +149,7 @@ func decodeBodyToContact(r *http.Request) (*Contact, error) {
 	// Validate the Contact struct
 	err = validate.Struct(contact)
 	if err != nil {
-		if validationErrors, ok := err.(validator.ValidationErrors); !ok {
-			for _, fieldError := range validationErrors {
-				// Log and return specific validation error
-				internal.Logger.Warn(fmt.Sprintf("Validation failed for field '%s': %v", fieldError.Field(), fieldError.Tag()))
-				return nil, fmt.Errorf("validation failed for field '%s': %v", fieldError.Field(), fieldError.Tag())
-			}
-		} else {
-			// Log and return generic validation error
-			internal.Logger.Warn(fmt.Sprintf("Validation failed: %v", err))
-			return nil, fmt.Errorf("validation failed: %v", err)
-		}
+		return nil, fmt.Errorf("Err(s):\n%+v", err)
 	}
 	// Return Contact object
 	return &contact, nil
