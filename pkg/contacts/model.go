@@ -67,7 +67,9 @@ func regexValidator(pattern string) validator.Func {
 		}
 
 		// Validate the field value against the regex pattern
-		return re.MatchString(fl.Field().String())
+		matches := re.MatchString(fl.Field().String())
+		internal.Logger.Info(fmt.Sprintf("Validating field '%s' with value '%s': %v", fl.FieldName(), fl.Field().String(), matches))
+		return matches
 	}
 }
 

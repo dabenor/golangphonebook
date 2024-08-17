@@ -151,12 +151,16 @@ func decodeBodyToContact(r *http.Request) (*Contact, error) {
 	// Validate the Contact struct
 	err = validate.Struct(contact)
 	if err != nil {
-		if validationErrors, ok := err.(validator.ValidationErrors); ok {
+		if validationErrors, ok := err.(validator.ValidationErrors); !ok {
 			for _, fieldError := range validationErrors {
 				// Log and return specific validation error
 				internal.Logger.Warn(fmt.Sprintf("Validation failed for field '%s': %v", fieldError.Field(), fieldError.Tag()))
 				return nil, fmt.Errorf("validation failed for field '%s': %v", fieldError.Field(), fieldError.Tag())
 			}
+		} else {
+			// Log and return generic validation error
+			internal.Logger.Warn(fmt.Sprintf("Validation failed: %v", err))
+			return nil, fmt.Errorf("validation failed: %v", err)
 		}
 	}
 	// Return Contact object

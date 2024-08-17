@@ -121,6 +121,7 @@ func (repo *SQLContactRepository) DeleteContact(id int) error {
 		return result.Error
 	}
 	if result.RowsAffected == 0 {
+		internal.Logger.Error(fmt.Sprintf("no contact found with ID: %d", id))
 		return errors.New("no contact found with the given ID")
 	}
 
