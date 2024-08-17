@@ -14,6 +14,8 @@ import (
 )
 
 func PutContact(w http.ResponseWriter, r *http.Request, repo ContactRepository) {
+	defer internal.Timer("PutContact")
+
 	contact, err := decodeBodyToContact(r)
 	if err != nil {
 		internal.Logger.Error(fmt.Sprintf("Received invalid body in addContact method %s", err))
@@ -61,28 +63,6 @@ func GetAllContacts(w http.ResponseWriter, r *http.Request, repo ContactReposito
 }
 
 func UpdateContact(w http.ResponseWriter, r *http.Request, repo ContactRepository) {
-	contact, err := decodeBodyToContact(r)
-	if err != nil {
-		internal.Logger.Error(fmt.Sprintf("Received invalid body in updateContact method %s", err))
-		http.Error(w, "Invalid request body", http.StatusBadRequest)
-		return
-	} else {
-		// Require contact ID to address potential duplicate entries in the backend, need to know which contact we're updating
-		if contact.ID == 0 {
-			internal.Logger.Error("Missing Contact ID in request to update contact")
-			http.Error(w, "Invalid request body, missing ID for contact update", http.StatusBadRequest)
-			return
-		}
-		internal.Logger.Info(fmt.Sprintf("Received valid body in updateContact method %s", contact))
-	}
-
-	err = repo.UpdateContact(*contact)
-	if err != nil {
-		http.Error(w, fmt.Sprintf("Failed to update contact to db with error %s", err), http.StatusInternalServerError)
-	}
-}
-
-func DeleteContact(w http.ResponseWriter, r *http.Request, repo ContactRepository) {
 	// Extract ID from  URL path /deleteContact/{id}
 	vars := mux.Vars(r)
 	id, err := strconv.Atoi(vars["id"])
@@ -91,7 +71,35 @@ func DeleteContact(w http.ResponseWriter, r *http.Request, repo ContactRepositor
 		http.Error(w, "Invalid ID, IDs can only be integers", http.StatusBadRequest)
 		return
 	}
-	internal.Logger.Info(fmt.Sprintf("ID detected is %d", id))
+	internal.Logger.Info(fmt.Sprintf("ID to update detected as %d", id))
+
+	contact, err := decodeBodyToContact(r)
+	if err != nil {
+		internal.Logger.Error(fmt.Sprintf("Received invalid body in updateContact method %s", err))
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	internal.Logger.Info(fmt.Sprintf("Received valid body in updateContact method %s", contact))
+
+	err = repo.UpdateContact(id, *contact)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Failed to update contact to db with error %s", err), http.StatusInternalServerError)
+	}
+}
+
+func DeleteContact(w http.ResponseWriter, r *http.Request, repo ContactRepository) {
+	defer internal.Timer("DeleteContact")
+
+	// Extract ID from  URL path /deleteContact/{id}
+	vars := mux.Vars(r)
+	id, err := strconv.Atoi(vars["id"])
+
+	if err != nil {
+		http.Error(w, "Invalid ID, IDs can only be integers", http.StatusBadRequest)
+		return
+	}
+	internal.Logger.Info(fmt.Sprintf("ID to delete detected as %d", id))
 
 	err = repo.DeleteContact(id)
 	if err != nil {
@@ -103,7 +111,6 @@ func DeleteContact(w http.ResponseWriter, r *http.Request, repo ContactRepositor
 		return
 	}
 
-	internal.Logger.Info("Contact deleted successfully")
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("Contact deleted successfully"))
 }

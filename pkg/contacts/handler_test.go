@@ -31,7 +31,7 @@ func (m *MockContactRepository) GetAllContacts() {
 	return
 }
 
-func (m *MockContactRepository) UpdateContact(contact contacts.Contact) error {
+func (m *MockContactRepository) UpdateContact(id int, contact contacts.Contact) error {
 	return nil
 }
 

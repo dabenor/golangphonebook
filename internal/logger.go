@@ -2,8 +2,10 @@
 package internal
 
 import (
+	"fmt"
 	"log"
 	"os"
+	"time"
 )
 
 // Declare the Logger as a global variable so it can be used directly once the package is imported
@@ -43,4 +45,11 @@ func (l *ConsoleLogger) Warn(v ...interface{}) {
 
 func (l *ConsoleLogger) Error(v ...interface{}) {
 	l.error.Println(v...)
+}
+
+func Timer(name string) func() {
+	start := time.Now()
+	return func() {
+		Logger.Info(fmt.Sprintf("%s took %v\n", name, time.Since(start)))
+	}
 }

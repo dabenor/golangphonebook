@@ -74,7 +74,7 @@ func (repo *SQLContactRepository) GetAllContacts() {
 	return
 }
 
-func (repo *SQLContactRepository) UpdateContact(contact Contact) error {
+func (repo *SQLContactRepository) UpdateContact(id int, contact Contact) error {
 	internal.Logger.Info("Made it to the update method!")
 	return nil
 }
