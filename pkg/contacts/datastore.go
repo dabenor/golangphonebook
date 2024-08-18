@@ -47,15 +47,15 @@ func (repo *SQLContactRepository) FilterContacts(filters map[string]string) (*go
 	query := repo.DB.Model(&Contact{})
 
 	if firstName, exists := filters["first_name"]; exists {
-		query = query.Where("first_name LIKE ?", "%"+firstName+"%")
+		query = query.Where("first_name ILIKE ?", "%"+firstName+"%")
 	}
 
 	if lastName, exists := filters["last_name"]; exists {
-		query = query.Where("last_name LIKE ?", "%"+lastName+"%")
+		query = query.Where("last_name ILIKE ?", "%"+lastName+"%")
 	}
 
 	if address, exists := filters["address"]; exists {
-		query = query.Where("address LIKE ?", "%"+address+"%")
+		query = query.Where("address ILIKE ?", "%"+address+"%")
 	}
 
 	if phone, exists := filters["phone"]; exists {
