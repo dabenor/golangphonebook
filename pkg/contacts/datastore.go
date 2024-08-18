@@ -110,8 +110,6 @@ func (repo *SQLContactRepository) SearchContacts(query *gorm.DB, page int, sortB
 			filterState.CachedPage = page + 1 // We cached the next page
 		} else if len(contacts) == 10 {
 			contacts = contacts[:10] // Serve the first 10 records
-		} else {
-			contacts = contacts[:] // Serve all the records, since there are fewer than 10
 		}
 
 	}
