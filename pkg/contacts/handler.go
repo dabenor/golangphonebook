@@ -254,6 +254,63 @@ func DeleteContact(w http.ResponseWriter, r *http.Request, repo ContactRepositor
 	w.Write([]byte("Contact deleted successfully"))
 }
 
+func DeleteContacts(w http.ResponseWriter, r *http.Request, repo ContactRepository) {
+	defer internal.Timer("DeleteContacts")()
+
+	// Extract comma-separated IDs from the query parameters
+	idsParam := r.URL.Query().Get("ids")
+	if idsParam == "" {
+		http.Error(w, "No IDs provided", http.StatusBadRequest)
+		return
+	}
+
+	// Split the IDs by comma
+	ids := strings.Split(idsParam, ",")
+	if len(ids) > 20 {
+		http.Error(w, "Cannot delete more than 20 contacts at a time", http.StatusBadRequest)
+		return
+	}
+
+	var invalidIds []string
+	var validIds []int
+
+	// Validate each ID
+	for _, idStr := range ids {
+		id, err := strconv.Atoi(strings.TrimSpace(idStr))
+		if err != nil {
+			invalidIds = append(invalidIds, idStr)
+		} else {
+			validIds = append(validIds, id)
+		}
+	}
+
+	// If there are any invalid IDs, return an error
+	if len(invalidIds) > 0 {
+		http.Error(w, fmt.Sprintf("Invalid IDs: %v. IDs can only be integers.", invalidIds), http.StatusBadRequest)
+		return
+	}
+
+	// Iterate over the valid IDs and delete each contact
+	for _, id := range validIds {
+		internal.Logger.Info(fmt.Sprintf("Attempting to delete contact with ID %d", id))
+
+		err := repo.DeleteContact(id)
+		if err != nil {
+			if err.Error() == "no contact found with the given ID" {
+				http.Error(w, fmt.Sprintf("No contact found with ID %d", id), http.StatusNotFound)
+			} else {
+				http.Error(w, fmt.Sprintf("Failed to delete contact with ID %d", id), http.StatusInternalServerError)
+			}
+			return
+		}
+	}
+
+	filterState.UpdateCache = true
+
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("Contacts deleted successfully"))
+}
+
 // Helper method(s)
 // Decode JSON body into a Contact
 func decodeBodyToContact(r *http.Request) (*Contact, error) {

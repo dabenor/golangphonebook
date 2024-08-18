@@ -123,22 +123,6 @@ func (repo *SQLContactRepository) SearchContacts(query *gorm.DB, page int, sortB
 	return contacts, nil
 }
 
-// TODO: remove this method
-func (repo *SQLContactRepository) GetAllContacts() {
-	var contacts []Contact
-
-	// Query the database to retrieve all contacts
-	err := repo.DB.Find(&contacts).Error
-	if err != nil {
-		internal.Logger.Error(fmt.Sprintf("Error on getting contacts %v", err))
-	}
-
-	internal.Logger.Info(fmt.Sprintf("Retrieved %d contacts", len(contacts)))
-	for _, contact := range contacts {
-		fmt.Println(contact)
-	}
-}
-
 func (repo *SQLContactRepository) UpdateContact(id int, updatedContact Contact) error {
 	// Check if contact exists
 	var existingContact Contact

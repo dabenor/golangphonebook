@@ -32,6 +32,7 @@ func main() {
 	router.HandleFunc("/updateContact/{id}", func(w http.ResponseWriter, r *http.Request) { contacts.UpdateContact(w, r, repo) }).Methods("POST")
 	// D
 	router.HandleFunc("/deleteContact/{id}", func(w http.ResponseWriter, r *http.Request) { contacts.DeleteContact(w, r, repo) }).Methods("DELETE")
+	router.HandleFunc("/deleteContacts", func(w http.ResponseWriter, r *http.Request) { contacts.DeleteContacts(w, r, repo) }).Methods("DELETE")
 	// Add router for dynamic routes
 	http.Handle("/", router)
 
