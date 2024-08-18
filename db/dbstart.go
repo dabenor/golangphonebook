@@ -8,6 +8,7 @@ import (
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
 func DBInit() (*gorm.DB, error) {
@@ -27,7 +28,7 @@ func DBInit() (*gorm.DB, error) {
 		internal.Logger.Error(fmt.Sprintf("Failed to connect to DB with error: %v", err))
 		return nil, err
 	}
-
+	db.Logger.LogMode(logger.Info)
 	err = db.AutoMigrate(&contacts.Contact{})
 	if err != nil {
 		internal.Logger.Error(fmt.Sprintf("Error migrating schema: %v\n", err))

@@ -93,6 +93,7 @@ func GetContacts(w http.ResponseWriter, r *http.Request, repo ContactRepository)
 	// Check if the filter or page has changed
 	if filterState.QueryString == queryString && page == filterState.CachedPage && !filterState.UpdateCache {
 		// If the filter is the same and page is the same, serve from cache
+		internal.Logger.Info("Fetching data stored in the cache, user just went up a page")
 		if len(filterState.Cache) > 0 {
 			paginatedContacts := PaginatedContacts{
 				Contacts:    filterState.Cache[:len(filterState.Cache)],
@@ -127,6 +128,7 @@ func GetContacts(w http.ResponseWriter, r *http.Request, repo ContactRepository)
 		}
 
 	} else { // If it's a new fetch continue below
+		internal.Logger.Info("Something has changed, so fetching data from the db rather than from the cache")
 		filterState.Query = query
 		filterState.QueryString = queryString
 		// filteredState.Cache is populated below

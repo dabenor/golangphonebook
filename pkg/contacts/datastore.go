@@ -42,12 +42,6 @@ func (repo *SQLContactRepository) AddContact(contact Contact) error {
 	}
 }
 
-func (repo *SQLContactRepository) GetContacts(page int) error {
-	internal.Logger.Info("Made it to getContacts")
-	return nil
-
-}
-
 func (repo *SQLContactRepository) FilterContacts(filters map[string]string) (*gorm.DB, int64, error) {
 	// Build the query based on filters
 	query := repo.DB.Model(&Contact{})
