@@ -35,9 +35,6 @@ func (m *MockContactRepository) SearchContacts(query *gorm.DB, page int, sortBy 
 	return nil, nil
 }
 
-func (m *MockContactRepository) GetAllContacts() {
-}
-
 func (m *MockContactRepository) UpdateContact(id int, contact contacts.Contact) error {
 	if m.updateContactFn != nil {
 		return m.updateContactFn(id, contact)

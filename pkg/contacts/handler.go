@@ -194,10 +194,6 @@ func GetContacts(w http.ResponseWriter, r *http.Request, repo ContactRepository)
 
 }
 
-func GetAllContacts(w http.ResponseWriter, r *http.Request, repo ContactRepository) {
-	repo.GetAllContacts()
-}
-
 func UpdateContact(w http.ResponseWriter, r *http.Request, repo ContactRepository) {
 	// Extract ID from  URL path /deleteContact/{id}
 	vars := mux.Vars(r)

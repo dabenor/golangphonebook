@@ -28,7 +28,6 @@ func main() {
 	router.HandleFunc("/addContact", func(w http.ResponseWriter, r *http.Request) { contacts.PutContact(w, r, repo) }).Methods("PUT")
 	// R
 	router.HandleFunc("/getContacts", func(w http.ResponseWriter, r *http.Request) { contacts.GetContacts(w, r, repo) }).Methods("GET")
-	router.HandleFunc("/getAllContacts", func(w http.ResponseWriter, r *http.Request) { contacts.GetAllContacts(w, r, repo) }).Methods("GET")
 	// U
 	router.HandleFunc("/updateContact/{id}", func(w http.ResponseWriter, r *http.Request) { contacts.UpdateContact(w, r, repo) }).Methods("POST")
 	// D
