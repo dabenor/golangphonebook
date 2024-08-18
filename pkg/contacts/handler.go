@@ -99,9 +99,15 @@ func GetContacts(w http.ResponseWriter, r *http.Request, repo ContactRepository)
 	totalPages := int((totalCount + 9) / 10)
 	// Failsafe for out of bounds page numbers, some tolerance for invalid page number input (just default to 1)
 	page, err := strconv.Atoi(pageStr)
+	internal.Logger.Info(fmt.Sprintf("error here is %v", err))
 	if err != nil || page < 1 || page > totalPages {
 		page = 1
 	}
+
+	internal.Logger.Info(fmt.Sprintf("filterState queryState: %s", filterState.QueryString))
+	internal.Logger.Info(fmt.Sprintf("new queryState: %s", queryString))
+	internal.Logger.Info(fmt.Sprintf("Cached page is %d and queried page is %d", filterState.CachedPage, page))
+	internal.Logger.Info(fmt.Sprintf("UpdateCache requirement is %s", strconv.FormatBool(filterState.UpdateCache)))
 
 	// Check if the filter or page has changed, queries are case insensitive so let's consider that here too
 	if strings.EqualFold(filterState.QueryString, queryString) && page == filterState.CachedPage && !filterState.UpdateCache {
