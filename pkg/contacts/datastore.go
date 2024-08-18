@@ -104,9 +104,12 @@ func (repo *SQLContactRepository) SearchContacts(query *gorm.DB, page int, sortB
 
 	// Update filter state
 	if initialFetch {
-		filterState.Cache = contacts[10:] // Cache the next 10 records
-		filterState.CachedPage = page + 1 // We cached the next page
-		contacts = contacts[:10]          // Serve the first 10 records
+		if len(contacts) > 10 {
+			// Don't cache any of these if they don't exist
+			filterState.Cache = contacts[10:] // Cache the next 10 records
+			filterState.CachedPage = page + 1 // We cached the next page
+		}
+		contacts = contacts[:10] // Serve the first 10 records
 	}
 
 	return contacts, nil
