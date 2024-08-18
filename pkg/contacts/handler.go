@@ -68,6 +68,10 @@ func GetContacts(w http.ResponseWriter, r *http.Request, repo ContactRepository)
 		"phone":      r.URL.Query().Get("phone"),
 		"sort_str":   sortByStr,
 	}
+
+	internal.Logger.Info(fmt.Sprintf("Filters applied: %v", filters))
+	internal.Logger.Info(fmt.Sprintf("page input: %s", pageStr))
+	internal.Logger.Info(fmt.Sprintf("sort_by input: %s", pageStr))
 	// For comparisons, check if changes to filter
 	queryString := buildFilterQueryString(filters)
 
@@ -90,11 +94,8 @@ func GetContacts(w http.ResponseWriter, r *http.Request, repo ContactRepository)
 	if filterState.QueryString == queryString && page == filterState.CachedPage && !filterState.UpdateCache {
 		// If the filter is the same and page is the same, serve from cache
 		if len(filterState.Cache) > 0 {
-			cachedContacts := filterState.Cache[:10]
-			filterState.Cache = filterState.Cache[10:]
-
 			paginatedContacts := PaginatedContacts{
-				Contacts:    cachedContacts,
+				Contacts:    filterState.Cache[:len(filterState.Cache)],
 				TotalPages:  filterState.TotalPages,
 				CurrentPage: page,
 				TotalCount:  filterState.TotalCount,

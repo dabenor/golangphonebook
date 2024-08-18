@@ -1,4 +1,5 @@
 services:
+  # Database service for the actual application
   db:
     image: postgres:latest
     environment:
@@ -16,8 +17,9 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-  # Env vars defined here since it's a local instance, for production would store these elsewhere
-  app:
+
+  # Application service that connects to the main database
+  phonebook:
     build: .
     depends_on:
       db:
@@ -33,6 +35,42 @@ services:
     volumes:
       - .:/app
     working_dir: /app
+
+  # Separate database service for testing
+  test_db:
+    image: postgres:latest
+    environment:
+      POSTGRES_DB: test_contacts
+      POSTGRES_USER: testuser
+      POSTGRES_PASSWORD: testpassword
+    ports:
+      - "5433:5432"
+    # No volume mount to ensure it's ephemeral and doesn't maintain state
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U testuser -d test_contacts"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Service for running tests
+  test:
+    build:
+      context: .
+      target: test
+    command: bash -c "go test -v ./... -count=1"
+    environment:
+      DB_HOST: test_db
+      DB_PORT: 5432
+      DB_USER: testuser
+      DB_PASSWORD: testpassword
+      DB_NAME: test_contacts
+    depends_on:
+      test_db:
+        condition: service_healthy
+    volumes:
+      - .:/app
+    working_dir: /app
+    # restart: "no"
 
 volumes:
   postgres_data:

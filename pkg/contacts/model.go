@@ -49,9 +49,9 @@ type PaginatedContacts struct {
 }
 
 func (c Contact) String() string {
-	if c.LastModified.IsZero() {
-		return fmt.Sprintf("Contact(ID=%d, FirstName=%s, LastName=%s, Phone=%s, Address=%s)",
-			c.ID, c.FirstName, c.LastName, c.Phone, c.Address)
+	if c.LastModified.IsZero() && c.ID == 0 {
+		return fmt.Sprintf("Contact(FirstName=%s, LastName=%s, Phone=%s, Address=%s)",
+			c.FirstName, c.LastName, c.Phone, c.Address)
 	} else {
 		return fmt.Sprintf("Contact(ID=%d, FirstName=%s, LastName=%s, Phone=%s, Address=%s, LastModified=%s)",
 			c.ID, c.FirstName, c.LastName, c.Phone, c.Address, c.LastModified)
