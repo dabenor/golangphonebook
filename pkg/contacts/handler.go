@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"golangphonebook/internal"
 	"io"
-	"log"
 	"net/http"
 	"sort"
 	"strconv"
@@ -112,7 +111,6 @@ func GetContacts(w http.ResponseWriter, r *http.Request, repo ContactRepository)
 	if strings.EqualFold(filterState.QueryString, queryString) && page == filterState.CachedPage && !filterState.UpdateCache {
 		// If the filter is the same and page is the same, serve from cache
 		internal.Logger.Info("Fetching data stored in the cache, user just went up a page")
-		log.Print("Fetching data stored in the cache, user just went up a page")
 		if len(filterState.Cache) > 0 {
 			paginatedContacts := PaginatedContacts{
 				Contacts:    filterState.Cache[:len(filterState.Cache)],
@@ -148,14 +146,13 @@ func GetContacts(w http.ResponseWriter, r *http.Request, repo ContactRepository)
 
 	} else { // If it's a new fetch continue below
 		internal.Logger.Info("Something has changed, so fetching data from the db rather than from the cache")
-		log.Print("Something has changed, so fetching data from the db rather than from the cache")
 		filterState.Query = query
 		filterState.QueryString = queryString
-		// filteredState.Cache is populated below
+		// filteredState.Cache is populated in search method
 		filterState.CachedPage = page + 1
 		filterState.TotalPages = totalPages
 		filterState.TotalCount = totalCount
-		// filterState.UpdateCache is updated below
+		// filterState.UpdateCache is updated in search method
 	}
 
 	// Get the contacts for the specified page using SearchContacts
@@ -164,12 +161,6 @@ func GetContacts(w http.ResponseWriter, r *http.Request, repo ContactRepository)
 		internal.Logger.Error(fmt.Sprintf("Failed to search contacts: %v", err))
 		http.Error(w, "Failed to search contacts", http.StatusInternalServerError)
 		return
-	}
-
-	// Cache the next set of contacts if it's the initial fetch
-	if len(contacts) > 10 {
-		filterState.Cache = contacts
-		filterState.UpdateCache = false
 	}
 
 	// Construct the PaginatedContacts object
