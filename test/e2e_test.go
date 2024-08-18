@@ -3,13 +3,13 @@ package test
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"golangphonebook/db"
 	"golangphonebook/internal"
 	"golangphonebook/pkg/contacts"
 	"net/http"
 	"net/http/httptest"
 	"testing"
-	"time"
 
 	"github.com/gorilla/mux"
 	"github.com/stretchr/testify/assert"
@@ -161,55 +161,38 @@ func testDeleteContact(t *testing.T) {
 }
 
 func testSearchContacts(t *testing.T) {
-	time.Sleep(30 * time.Second)
-	// // Create 23 contacts
-	// contactsToCreate := []contacts.Contact{
-	// 	{FirstName: "John", LastName: "Doe", Phone: "+1234567891", Address: "123 Main St"},
-	// 	{FirstName: "Jane", LastName: "Smith", Phone: "+1234567892", Address: "456 Elm St"},
-	// }
-	// time.Sleep(2 * time.Second)
+	// Create 35 contacts
+	contactsToCreate := []contacts.Contact{
+		{FirstName: "John", LastName: "Doe", Phone: "+1234567891", Address: "123 Main St"},
+		{FirstName: "Jane", LastName: "Smith", Phone: "+1234567892", Address: "456 Elm St"},
+	}
 
-	// // Fill up the list with unique contacts
-	// for i := 3; i <= 23; i++ {
-	// 	contact := contacts.Contact{
-	// 		FirstName: fmt.Sprintf("Person%d", i),
-	// 		LastName:  fmt.Sprintf("Last%d", i),
-	// 		Phone:     fmt.Sprintf("+12345678%02d", i),
-	// 		Address:   fmt.Sprintf("%d Street", i),
-	// 	}
-	// 	contactsToCreate = append(contactsToCreate, contact)
-	// }
+	// Fill up the list with a few more unique contacts
+	for i := 3; i <= 35; i++ {
+		contact := contacts.Contact{
+			FirstName: fmt.Sprintf("Person%d", i),
+			LastName:  fmt.Sprintf("Last%d", i),
+			Phone:     fmt.Sprintf("+12345678%02d", i),
+			Address:   fmt.Sprintf("%d Street", i),
+		}
+		contactsToCreate = append(contactsToCreate, contact)
+	}
 
-	// // Add contacts to the DB in batches with a delay
-	// for index, contact := range contactsToCreate {
-	// 	internal.Logger.Info(fmt.Sprintf("Adding contact %d: %+v", index+1, contact))
-	// 	contactJSON, err := json.Marshal(contact)
-	// 	assert.NoError(t, err)
+	// Add contacts to the DB
+	for _, contact := range contactsToCreate {
+		contactJSON, err := json.Marshal(contact)
+		if err != nil {
+			internal.Logger.Error(fmt.Sprintf("Error in marshalling json: %v", err))
+		}
+		assert.NoError(t, err)
 
-	// 	resp, err := http.Post(testServer.URL+"/addContact", "application/json", bytes.NewBuffer(contactJSON))
-	// 	assert.NoError(t, err)
-	// 	assert.Equal(t, http.StatusOK, resp.StatusCode)
-
-	// 	// Introduce a small delay every contact
-	// 	time.Sleep(3 * time.Second)
-
-	// }
-
-	// // // Add contacts to the DB
-	// // for _, contact := range contactsToCreate {
-	// // 	contactJSON, err := json.Marshal(contact)
-	// // 	if err != nil {
-	// // 		internal.Logger.Error(fmt.Sprintf("Error in marshalling json: %v", err))
-	// // 	}
-	// // 	assert.NoError(t, err)
-
-	// // 	resp, err := http.Post(testServer.URL+"/addContact", "application/json", bytes.NewBuffer(contactJSON))
-	// // 	if err != nil {
-	// // 		internal.Logger.Error(fmt.Sprintf("Error in adding contact to DB for test: %v", err))
-	// // 	}
-	// // 	assert.NoError(t, err)
-	// // 	assert.Equal(t, http.StatusOK, resp.StatusCode)
-	// // }
+		resp, err := http.Post(testServer.URL+"/addContact", "application/json", bytes.NewBuffer(contactJSON))
+		if err != nil {
+			internal.Logger.Error(fmt.Sprintf("Error in adding contact to DB for test: %v", err))
+		}
+		assert.NoError(t, err)
+		assert.Equal(t, http.StatusOK, resp.StatusCode)
+	}
 
 	// // Test pagination: Get the first page (10 contacts)
 	// resp, err := http.Get(testServer.URL + "/getContacts?page=1")
@@ -220,27 +203,7 @@ func testSearchContacts(t *testing.T) {
 	// err = json.NewDecoder(resp.Body).Decode(&paginatedContacts)
 	// assert.NoError(t, err)
 	// assert.Equal(t, 10, len(paginatedContacts.Contacts))
-	// assert.Equal(t, 3, paginatedContacts.TotalPages) // Expecting 3 pages (23 contacts total)
-
-	// // Test pagination: Get the second page (next 10 contacts)
-	// resp, err = http.Get(testServer.URL + "/getContacts?page=2")
-	// assert.NoError(t, err)
-	// assert.Equal(t, http.StatusOK, resp.StatusCode)
-
-	// err = json.NewDecoder(resp.Body).Decode(&paginatedContacts)
-	// assert.NoError(t, err)
-	// assert.Equal(t, 10, len(paginatedContacts.Contacts))
-	// assert.Equal(t, 3, paginatedContacts.TotalPages) // Expecting 3 pages
-
-	// // Test pagination: Get the third page (remaining 3 contacts)
-	// resp, err = http.Get(testServer.URL + "/getContacts?page=3")
-	// assert.NoError(t, err)
-	// assert.Equal(t, http.StatusOK, resp.StatusCode)
-
-	// err = json.NewDecoder(resp.Body).Decode(&paginatedContacts)
-	// assert.NoError(t, err)
-	// assert.Equal(t, 3, len(paginatedContacts.Contacts))
-	// assert.Equal(t, 3, paginatedContacts.TotalPages) // Expecting 3 pages
+	// assert.Equal(t, 1, paginatedContacts.TotalPages) // Expecting 1 page (10 contacts total)
 
 	// // Test filtering by first name: Search for "John"
 	// resp, err = http.Get(testServer.URL + "/getContacts?page=1&first_name=John")
@@ -262,25 +225,15 @@ func testSearchContacts(t *testing.T) {
 	// assert.Equal(t, 1, len(paginatedContacts.Contacts))
 	// assert.Equal(t, "Doe", paginatedContacts.Contacts[0].LastName)
 
-	// // Test pagination with a filter: Search for "Person" in first name (should get multiple pages)
-	// resp, err = http.Get(testServer.URL + "/getContacts?page=1&first_name=Person")
+	// // Test filtering with a name that should not exist
+	// resp, err = http.Get(testServer.URL + "/getContacts?page=1&first_name=Nonexistent")
 	// assert.NoError(t, err)
 	// assert.Equal(t, http.StatusOK, resp.StatusCode)
 
 	// err = json.NewDecoder(resp.Body).Decode(&paginatedContacts)
 	// assert.NoError(t, err)
-	// assert.Equal(t, 10, len(paginatedContacts.Contacts)) // Should return the first 10 matching contacts
-	// assert.Equal(t, 2, paginatedContacts.TotalPages)     // Expecting 2 pages for "Person" results
-
-	// // Test second page of filtered results
-	// resp, err = http.Get(testServer.URL + "/getContacts?page=2&first_name=Person")
-	// assert.NoError(t, err)
-	// assert.Equal(t, http.StatusOK, resp.StatusCode)
-
-	// err = json.NewDecoder(resp.Body).Decode(&paginatedContacts)
-	// assert.NoError(t, err)
-	// assert.Equal(t, 7, len(paginatedContacts.Contacts)) // Remaining 7 matching contacts
-	// assert.Equal(t, 2, paginatedContacts.TotalPages)    // Expecting 2 pages
+	// assert.Equal(t, 0, len(paginatedContacts.Contacts)) // Should return 0 results
+	// assert.Equal(t, 0, paginatedContacts.TotalPages)    // Should return 0 pages
 }
 
 func setupTestServer() {
