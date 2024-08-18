@@ -99,7 +99,6 @@ func GetContacts(w http.ResponseWriter, r *http.Request, repo ContactRepository)
 	totalPages := int((totalCount + 9) / 10)
 	// Failsafe for out of bounds page numbers, some tolerance for invalid page number input (just default to 1)
 	page, err := strconv.Atoi(pageStr)
-	internal.Logger.Info(fmt.Sprintf("error here is %v", err))
 	if err != nil || page < 1 || page > totalPages {
 		page = 1
 	}
