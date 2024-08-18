@@ -58,9 +58,9 @@ Then you can access the application by sending CURL requests to [http://localhos
 ```
 
 **Responses:**
-200 OK: Contact added successfully.
-400 Bad Request: Invalid request body, first name and phone must be correctly defined.
-500 Internal Server Error: Failed to insert contact into the database.
+- 200 OK: Contact added successfully.
+- 400 Bad Request: Invalid request body, first name and phone must be correctly defined.
+- 500 Internal Server Error: Failed to insert contact into the database.
 
 
 ### Add Contacts
