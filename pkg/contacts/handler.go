@@ -66,6 +66,7 @@ func GetContacts(w http.ResponseWriter, r *http.Request, repo ContactRepository)
 		"last_name":  r.URL.Query().Get("last_name"),
 		"address":    r.URL.Query().Get("address"),
 		"phone":      r.URL.Query().Get("phone"),
+		"sort_str":   sortByStr,
 	}
 	// For comparisons, check if changes to filter
 	queryString := buildFilterQueryString(filters)
