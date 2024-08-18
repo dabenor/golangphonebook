@@ -429,9 +429,38 @@ func testSearchContactsWithUpdates(t *testing.T) {
 
 	err = json.NewDecoder(resp.Body).Decode(&paginatedContacts)
 	assert.NoError(t, err)
-	// assert.Equal(t, 2, len(paginatedContacts.Contacts)) // Remaining 3 matching contacts
-	internal.Logger.Info(fmt.Sprintf("How many contacts bro? %d", len(paginatedContacts.Contacts)))
-	// assert.Equal(t, 4, paginatedContacts.TotalPages)    // Expecting 4 pages
+	assert.Equal(t, 10, len(paginatedContacts.Contacts)) // next 10 matching contacts
+	assert.Equal(t, 4, paginatedContacts.TotalPages)     // Expecting 4 pages
+
+	// Test fourth page of filtered results for "Person"
+	resp, err = http.Get(testServer.URL + "/getContacts?page=4&first_name=Person")
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusOK, resp.StatusCode)
+
+	err = json.NewDecoder(resp.Body).Decode(&paginatedContacts)
+	assert.NoError(t, err)
+	assert.Equal(t, 3, len(paginatedContacts.Contacts)) // Remaining 3 matching contacts
+	assert.Equal(t, 4, paginatedContacts.TotalPages)    // Expecting 4 pages
+
+	// Test second page of filtered results for "Person" again
+	resp, err = http.Get(testServer.URL + "/getContacts?page=2&first_name=Person")
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusOK, resp.StatusCode)
+
+	err = json.NewDecoder(resp.Body).Decode(&paginatedContacts)
+	assert.NoError(t, err)
+	assert.Equal(t, 10, len(paginatedContacts.Contacts)) // Another 10 matching contacts
+	assert.Equal(t, 4, paginatedContacts.TotalPages)     // Expecting 4 pages
+
+	// Jump to fourth page of filtered results for "Person" (not using cache)
+	resp, err = http.Get(testServer.URL + "/getContacts?page=4&first_name=Person")
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusOK, resp.StatusCode)
+
+	err = json.NewDecoder(resp.Body).Decode(&paginatedContacts)
+	assert.NoError(t, err)
+	assert.Equal(t, 3, len(paginatedContacts.Contacts)) // Remaining 3 matching contacts
+	assert.Equal(t, 4, paginatedContacts.TotalPages)    // Expecting 4 pages
 }
 
 func setupTestServer() {
