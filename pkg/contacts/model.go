@@ -62,7 +62,7 @@ func (c Contact) String() string {
 type ContactRepository interface {
 	AddContact(contact Contact) error
 	FilterContacts(filters map[string]string) (*gorm.DB, int64, error)
-	SearchContacts(query *gorm.DB, page int, sortBy SortBy, initialFetch bool) ([]Contact, error)
+	SearchContacts(query *gorm.DB, page int, sortBy SortBy, ascending bool, initialFetch bool) ([]Contact, error)
 	GetAllContacts()
 	UpdateContact(id int, contact Contact) error
 	DeleteContact(id int) error

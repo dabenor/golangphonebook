@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"golangphonebook/internal"
 	"io"
+	"log"
 	"net/http"
 	"sort"
 	"strconv"
@@ -47,7 +48,17 @@ func PutContact(w http.ResponseWriter, r *http.Request, repo ContactRepository) 
 
 func GetContacts(w http.ResponseWriter, r *http.Request, repo ContactRepository) {
 	pageStr := r.URL.Query().Get("page")
+	ascDec := r.URL.Query().Get("asc_dec")
 	sortByStr := r.URL.Query().Get("sort_by")
+
+	var ascending bool
+	if ascDec == "asc" {
+		ascending = true
+	} else if ascDec == "dec" {
+		ascending = false
+	} else {
+		ascending = true
+	}
 
 	var sortBy SortBy
 	switch sortByStr {
@@ -55,8 +66,9 @@ func GetContacts(w http.ResponseWriter, r *http.Request, repo ContactRepository)
 		sortBy = SortByFirstName
 	case "last_name":
 		sortBy = SortByLastName
-	case "last_modified":
+	case "last_modified": // I don't really know anyone who wants to see their very oldest contacts, you'd use this functionality for more recent ones
 		sortBy = SortByLastModified
+		ascending = false
 	default:
 		sortBy = SortByFirstName
 	}
@@ -66,6 +78,7 @@ func GetContacts(w http.ResponseWriter, r *http.Request, repo ContactRepository)
 		"last_name":  r.URL.Query().Get("last_name"),
 		"address":    r.URL.Query().Get("address"),
 		"phone":      r.URL.Query().Get("phone"),
+		"asc_dec":    strconv.FormatBool(ascending),
 		"sort_str":   sortByStr,
 	}
 
@@ -90,10 +103,11 @@ func GetContacts(w http.ResponseWriter, r *http.Request, repo ContactRepository)
 		page = 1
 	}
 
-	// Check if the filter or page has changed
-	if filterState.QueryString == queryString && page == filterState.CachedPage && !filterState.UpdateCache {
+	// Check if the filter or page has changed, queries are case insensitive so let's consider that here too
+	if strings.EqualFold(filterState.QueryString, queryString) && page == filterState.CachedPage && !filterState.UpdateCache {
 		// If the filter is the same and page is the same, serve from cache
 		internal.Logger.Info("Fetching data stored in the cache, user just went up a page")
+		log.Print("Fetching data stored in the cache, user just went up a page")
 		if len(filterState.Cache) > 0 {
 			paginatedContacts := PaginatedContacts{
 				Contacts:    filterState.Cache[:len(filterState.Cache)],
@@ -115,7 +129,7 @@ func GetContacts(w http.ResponseWriter, r *http.Request, repo ContactRepository)
 
 			// Start goroutine to prefetch the next set of contacts
 			go func() {
-				contacts, err := repo.SearchContacts(filterState.Query, page+1, sortBy, false)
+				contacts, err := repo.SearchContacts(filterState.Query, page+1, sortBy, ascending, false)
 				if err == nil && len(contacts) > 0 {
 					internal.Logger.Info("Cache updated successfully")
 				} else {
@@ -129,6 +143,7 @@ func GetContacts(w http.ResponseWriter, r *http.Request, repo ContactRepository)
 
 	} else { // If it's a new fetch continue below
 		internal.Logger.Info("Something has changed, so fetching data from the db rather than from the cache")
+		log.Print("Something has changed, so fetching data from the db rather than from the cache")
 		filterState.Query = query
 		filterState.QueryString = queryString
 		// filteredState.Cache is populated below
@@ -139,7 +154,7 @@ func GetContacts(w http.ResponseWriter, r *http.Request, repo ContactRepository)
 	}
 
 	// Get the contacts for the specified page using SearchContacts
-	contacts, err := repo.SearchContacts(query, page, sortBy, true)
+	contacts, err := repo.SearchContacts(query, page, sortBy, ascending, true)
 	if err != nil {
 		internal.Logger.Error(fmt.Sprintf("Failed to search contacts: %v", err))
 		http.Error(w, "Failed to search contacts", http.StatusInternalServerError)

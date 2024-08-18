@@ -31,7 +31,7 @@ func (m *MockContactRepository) FilterContacts(filters map[string]string) (*gorm
 	return nil, 0, nil
 }
 
-func (m *MockContactRepository) SearchContacts(query *gorm.DB, page int, sortBy contacts.SortBy, initialFetch bool) ([]contacts.Contact, error) {
+func (m *MockContactRepository) SearchContacts(query *gorm.DB, page int, sortBy contacts.SortBy, ascending bool, initialFetch bool) ([]contacts.Contact, error) {
 	return nil, nil
 }
 

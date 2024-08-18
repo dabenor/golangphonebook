@@ -70,7 +70,7 @@ func (repo *SQLContactRepository) FilterContacts(filters map[string]string) (*go
 	return query, count, nil
 }
 
-func (repo *SQLContactRepository) SearchContacts(query *gorm.DB, page int, sortBy SortBy, initialFetch bool) ([]Contact, error) {
+func (repo *SQLContactRepository) SearchContacts(query *gorm.DB, page int, sortBy SortBy, ascending bool, initialFetch bool) ([]Contact, error) {
 	var contacts []Contact
 	limit := 10
 	if initialFetch {
@@ -79,15 +79,22 @@ func (repo *SQLContactRepository) SearchContacts(query *gorm.DB, page int, sortB
 	offset := (page - 1) * 10
 
 	// Determine the sort order
+	var ascStr string
+	if ascending {
+		ascStr = "ASC"
+	} else {
+		ascStr = "DESC"
+	}
+
 	switch sortBy {
 	case SortByFirstName:
-		query = query.Order("first_name ASC")
+		query = query.Order("first_name " + ascStr)
 	case SortByLastName:
-		query = query.Order("last_name ASC")
+		query = query.Order("last_name " + ascStr)
 	case SortByLastModified:
-		query = query.Order("last_modified DESC")
+		query = query.Order("last_modified " + ascStr)
 	default:
-		query = query.Order("first_name ASC") // Default sorting
+		query = query.Order("first_name " + ascStr) // Default sorting
 	}
 
 	// Retrieve the contacts with pagination
