@@ -32,13 +32,13 @@ const (
 
 // Filter state tracking
 type FilterState struct {
+	Query       *gorm.DB  // The gorm.DB query object used for the current filter
 	QueryString string    // Current filter query as a string
-	CachedPage  int       // Current page stored in cache
 	Cache       []Contact // Cache to store pre-fetched contacts
+	CachedPage  int       // Current page stored in cache
 	TotalPages  int       // Total number of pages for the current filter
 	TotalCount  int64     // Total number of contacts matching the current filter
 	UpdateCache bool      // Do we need to refresh the cache due to changes in the DB
-	Query       *gorm.DB  // The gorm.DB query object used for the current filter
 }
 
 type PaginatedContacts struct {

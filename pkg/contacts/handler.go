@@ -86,7 +86,6 @@ func GetContacts(w http.ResponseWriter, r *http.Request, repo ContactRepository)
 	}
 
 	// Check if the filter or page has changed
-	isInitialFetch := false
 	if filterState.QueryString == queryString && page == filterState.CachedPage && !filterState.UpdateCache {
 		// If the filter is the same and page is the same, serve from cache
 		if len(filterState.Cache) > 0 {
@@ -126,29 +125,27 @@ func GetContacts(w http.ResponseWriter, r *http.Request, repo ContactRepository)
 		}
 
 	} else { // If it's a new fetch continue below
-		isInitialFetch = true
 		filterState.Query = query
 		filterState.QueryString = queryString
+		// filteredState.Cache is populated below
 		filterState.CachedPage = page + 1
-		filterState.UpdateCache = false
+		filterState.TotalPages = totalPages
+		filterState.TotalCount = totalCount
+		// filterState.UpdateCache is updated below
 	}
 
 	// Get the contacts for the specified page using SearchContacts
-	contacts, err := repo.SearchContacts(query, page, sortBy, isInitialFetch)
+	contacts, err := repo.SearchContacts(query, page, sortBy, true)
 	if err != nil {
 		internal.Logger.Error(fmt.Sprintf("Failed to search contacts: %v", err))
 		http.Error(w, "Failed to search contacts", http.StatusInternalServerError)
 		return
 	}
 
-	// Store pagination info in filterState
-	filterState.TotalPages = totalPages
-	filterState.TotalCount = totalCount
-
 	// Cache the next set of contacts if it's the initial fetch
-	if isInitialFetch && len(contacts) > 10 {
-		filterState.Cache = contacts[10:]
-		contacts = contacts[:10]
+	if len(contacts) > 10 {
+		filterState.Cache = contacts
+		filterState.UpdateCache = false
 	}
 
 	// Construct the PaginatedContacts object
@@ -171,15 +168,6 @@ func GetContacts(w http.ResponseWriter, r *http.Request, repo ContactRepository)
 	w.WriteHeader(http.StatusOK)
 	w.Write(response)
 
-	// Start goroutine to prefetch the next set of contacts
-	if !isInitialFetch {
-		go func() {
-			contacts, err := repo.SearchContacts(query, page+1, sortBy, false)
-			if err == nil && len(contacts) > 0 {
-				filterState.Cache = append(filterState.Cache, contacts...)
-			}
-		}()
-	}
 }
 
 func GetAllContacts(w http.ResponseWriter, r *http.Request, repo ContactRepository) {

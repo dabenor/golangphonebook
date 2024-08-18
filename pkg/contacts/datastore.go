@@ -107,9 +107,6 @@ func (repo *SQLContactRepository) SearchContacts(query *gorm.DB, page int, sortB
 		filterState.Cache = contacts[10:] // Cache the next 10 records
 		filterState.CachedPage = page + 1 // We cached the next page
 		contacts = contacts[:10]          // Serve the first 10 records
-	} else {
-		filterState.Cache = contacts  // Cache the fetched 10 records for page + 1
-		filterState.CachedPage = page // When called we call this func with page + 1 already
 	}
 
 	return contacts, nil
@@ -193,10 +190,6 @@ func (repo *SQLContactRepository) DeleteContact(id int) error {
 	return nil
 }
 
-func mergeDuplicates() {
-
-}
-
 // Helper methods
 func (repo *SQLContactRepository) GetContactCount() (int64, error) {
 	var count int64
@@ -205,9 +198,4 @@ func (repo *SQLContactRepository) GetContactCount() (int64, error) {
 		return 0, err
 	}
 	return count, nil
-}
-
-func contactExists() bool {
-	// TODO placeholder
-	return true
 }
