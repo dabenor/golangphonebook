@@ -10,6 +10,7 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/stretchr/testify/assert"
+	"gorm.io/gorm"
 )
 
 // MockContactRepository is a mock implementation of the ContactRepository interface
@@ -26,8 +27,12 @@ func (m *MockContactRepository) AddContact(contact contacts.Contact) error {
 	return nil
 }
 
-func (m *MockContactRepository) GetContacts(page int) error {
-	return nil
+func (m *MockContactRepository) FilterContacts(filters map[string]string) (*gorm.DB, int64, error) {
+	return nil, 0, nil
+}
+
+func (m *MockContactRepository) SearchContacts(query *gorm.DB, page int, sortBy contacts.SortBy, initialFetch bool) ([]contacts.Contact, error) {
+	return nil, nil
 }
 
 func (m *MockContactRepository) GetAllContacts() {

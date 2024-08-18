@@ -9,6 +9,8 @@ import (
 	"gorm.io/gorm"
 )
 
+var filterState FilterState
+
 type SQLContactRepository struct {
 	DB *gorm.DB
 }
@@ -46,10 +48,71 @@ func (repo *SQLContactRepository) GetContacts(page int) error {
 
 }
 
-func (repo *SQLContactRepository) GetContact(contact Contact) error {
-	internal.Logger.Info("Made it to getContacts")
-	return nil
+func (repo *SQLContactRepository) FilterContacts(filters map[string]string) (*gorm.DB, int64, error) {
+	// Build the query based on filters
+	query := repo.DB.Model(&Contact{})
 
+	if firstName, exists := filters["first_name"]; exists {
+		query = query.Where("first_name LIKE ?", "%"+firstName+"%")
+	}
+
+	if lastName, exists := filters["last_name"]; exists {
+		query = query.Where("last_name LIKE ?", "%"+lastName+"%")
+	}
+
+	if address, exists := filters["address"]; exists {
+		query = query.Where("address LIKE ?", "%"+address+"%")
+	}
+
+	if phone, exists := filters["phone"]; exists {
+		query = query.Where("phone LIKE ?", "%"+phone+"%")
+	}
+
+	var count int64
+	err := query.Count(&count).Error
+	if err != nil {
+		return nil, 0, err
+	}
+	return query, count, nil
+}
+
+func (repo *SQLContactRepository) SearchContacts(query *gorm.DB, page int, sortBy SortBy, initialFetch bool) ([]Contact, error) {
+	var contacts []Contact
+	limit := 10
+	if initialFetch {
+		limit = 20 // Fetch 20 records initially
+	}
+	offset := (page - 1) * 10
+
+	// Determine the sort order
+	switch sortBy {
+	case SortByFirstName:
+		query = query.Order("first_name ASC")
+	case SortByLastName:
+		query = query.Order("last_name ASC")
+	case SortByLastModified:
+		query = query.Order("last_modified DESC")
+	default:
+		query = query.Order("first_name ASC") // Default sorting
+	}
+
+	// Retrieve the contacts with pagination
+	err := query.Limit(limit).Offset(offset).Find(&contacts).Error
+	if err != nil {
+		return nil, err
+	}
+
+	// Update filter state
+	if initialFetch {
+		filterState.Cache = contacts[10:] // Cache the next 10 records
+		filterState.CachedPage = page + 1 // We cached the next page
+		contacts = contacts[:10]          // Serve the first 10 records
+	} else {
+		filterState.Cache = contacts  // Cache the fetched 10 records for page + 1
+		filterState.CachedPage = page // When called we call this func with page + 1 already
+	}
+
+	return contacts, nil
 }
 
 // TODO: remove this method

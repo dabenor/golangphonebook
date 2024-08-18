@@ -7,7 +7,9 @@ import (
 	"golangphonebook/internal"
 	"io"
 	"net/http"
+	"sort"
 	"strconv"
+	"strings"
 
 	"github.com/gorilla/mux"
 )
@@ -35,26 +37,149 @@ func PutContact(w http.ResponseWriter, r *http.Request, repo ContactRepository) 
 	}
 
 	internal.Logger.Info("Contact added to DB successfully")
+	// State tracking for caching, since changes to DB we need to pull fresh data
+	filterState.UpdateCache = true
+
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("Contact added to DB successfully"))
 	// Return an updated first page, maybe. Return contact itself. Or when user adds a contact, send them back to their origin page, or to page 1 of their contacts
 }
 
 func GetContacts(w http.ResponseWriter, r *http.Request, repo ContactRepository) {
-	// default page is page 1
-	page := 1
+	pageStr := r.URL.Query().Get("page")
+	sortByStr := r.URL.Query().Get("sort_by")
 
-	pageHeader := r.Header.Get("page")
-	if parsedPage, err := strconv.Atoi(pageHeader); err == nil {
-		// TODO: Add logic for upper bound of parsed page: Old logic && parsedPage <= repo.GetContactCount()/11+1
-		if parsedPage >= 1 {
-			page = parsedPage
-		} else {
-			internal.Logger.Warn("Invalid page number, defaulting to page 1")
-		}
+	var sortBy SortBy
+	switch sortByStr {
+	case "first_name":
+		sortBy = SortByFirstName
+	case "last_name":
+		sortBy = SortByLastName
+	case "last_modified":
+		sortBy = SortByLastModified
+	default:
+		sortBy = SortByFirstName
 	}
 
-	repo.GetContacts(page)
+	filters := map[string]string{
+		"first_name": r.URL.Query().Get("first_name"),
+		"last_name":  r.URL.Query().Get("last_name"),
+		"address":    r.URL.Query().Get("address"),
+		"phone":      r.URL.Query().Get("phone"),
+	}
+	// For comparisons, check if changes to filter
+	queryString := buildFilterQueryString(filters)
+
+	// Get the filtered gorm query, total count of contacts that match that query
+	query, totalCount, err := repo.FilterContacts(filters)
+	if err != nil {
+		internal.Logger.Error(fmt.Sprintf("Failed to filter contacts: %v", err))
+		http.Error(w, "Failed to filter contacts", http.StatusInternalServerError)
+		return
+	}
+
+	totalPages := int((totalCount + 9) / 10)
+	// Failsafe for out of bounds page numbers, some tolerance for invalid page number input (just default to 1)
+	page, err := strconv.Atoi(pageStr)
+	if err != nil || page < 1 || page > totalPages {
+		page = 1
+	}
+
+	// Check if the filter or page has changed
+	isInitialFetch := false
+	if filterState.QueryString == queryString && page == filterState.CachedPage && !filterState.UpdateCache {
+		// If the filter is the same and page is the same, serve from cache
+		if len(filterState.Cache) > 0 {
+			cachedContacts := filterState.Cache[:10]
+			filterState.Cache = filterState.Cache[10:]
+
+			paginatedContacts := PaginatedContacts{
+				Contacts:    cachedContacts,
+				TotalPages:  filterState.TotalPages,
+				CurrentPage: page,
+				TotalCount:  filterState.TotalCount,
+			}
+
+			response, err := json.Marshal(paginatedContacts)
+			if err != nil {
+				internal.Logger.Error(fmt.Sprintf("Failed to serialize contacts: %v", err))
+				http.Error(w, "Failed to serialize contacts", http.StatusInternalServerError)
+				return
+			}
+
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusOK)
+			w.Write(response)
+
+			// Start goroutine to prefetch the next set of contacts
+			go func() {
+				contacts, err := repo.SearchContacts(filterState.Query, page+1, sortBy, false)
+				if err == nil && len(contacts) > 0 {
+					internal.Logger.Info("Cache updated successfully")
+				} else {
+					internal.Logger.Error("Failed to update cache, setting cache to try updating again with next call")
+					filterState.UpdateCache = true
+				}
+			}()
+
+			return
+		}
+
+	} else { // If it's a new fetch continue below
+		isInitialFetch = true
+		filterState.Query = query
+		filterState.QueryString = queryString
+		filterState.CachedPage = page + 1
+		filterState.UpdateCache = false
+	}
+
+	// Get the contacts for the specified page using SearchContacts
+	contacts, err := repo.SearchContacts(query, page, sortBy, isInitialFetch)
+	if err != nil {
+		internal.Logger.Error(fmt.Sprintf("Failed to search contacts: %v", err))
+		http.Error(w, "Failed to search contacts", http.StatusInternalServerError)
+		return
+	}
+
+	// Store pagination info in filterState
+	filterState.TotalPages = totalPages
+	filterState.TotalCount = totalCount
+
+	// Cache the next set of contacts if it's the initial fetch
+	if isInitialFetch && len(contacts) > 10 {
+		filterState.Cache = contacts[10:]
+		contacts = contacts[:10]
+	}
+
+	// Construct the PaginatedContacts object
+	paginatedContacts := PaginatedContacts{
+		Contacts:    contacts,
+		TotalPages:  totalPages,
+		CurrentPage: page,
+		TotalCount:  totalCount,
+	}
+
+	// Serialize the PaginatedContacts object to JSON
+	response, err := json.Marshal(paginatedContacts)
+	if err != nil {
+		internal.Logger.Error(fmt.Sprintf("Failed to serialize contacts: %v", err))
+		http.Error(w, "Failed to serialize contacts", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(response)
+
+	// Start goroutine to prefetch the next set of contacts
+	if !isInitialFetch {
+		go func() {
+			contacts, err := repo.SearchContacts(query, page+1, sortBy, false)
+			if err == nil && len(contacts) > 0 {
+				filterState.Cache = append(filterState.Cache, contacts...)
+			}
+		}()
+	}
 }
 
 func GetAllContacts(w http.ResponseWriter, r *http.Request, repo ContactRepository) {
@@ -96,6 +221,8 @@ func UpdateContact(w http.ResponseWriter, r *http.Request, repo ContactRepositor
 		return
 	}
 
+	filterState.UpdateCache = true
+
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("Contact updated successfully"))
 }
@@ -122,6 +249,7 @@ func DeleteContact(w http.ResponseWriter, r *http.Request, repo ContactRepositor
 		}
 		return
 	}
+	filterState.UpdateCache = true
 
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("Contact deleted successfully"))
@@ -153,4 +281,22 @@ func decodeBodyToContact(r *http.Request) (*Contact, error) {
 	}
 	// Return Contact object
 	return &contact, nil
+}
+
+func buildFilterQueryString(filters map[string]string) string {
+	var queryParts []string
+
+	// Iterate over filters
+	for key, value := range filters {
+		if value != "" {
+			// Build the query part for the current filter
+			queryParts = append(queryParts, fmt.Sprintf("%s=%s", key, value))
+		}
+	}
+
+	// Sort query parts for consistent order
+	sort.Strings(queryParts)
+
+	// Join all parts into a string
+	return strings.Join(queryParts, "&")
 }

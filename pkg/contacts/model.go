@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/go-playground/validator/v10"
+	"gorm.io/gorm"
 )
 
 type Contact struct {
@@ -18,6 +19,33 @@ type Contact struct {
 	Address      string    `json:"address" gorm:"size:100;type:text"`                                                                  // Address field, stored as text in the database
 	LastModified time.Time `json:"last_modified" gorm:"autoUpdateTime;index"`                                                          // Automatically updated on save
 
+}
+
+// Sort enum
+type SortBy string
+
+const (
+	SortByFirstName    SortBy = "first_name"
+	SortByLastName     SortBy = "last_name"
+	SortByLastModified SortBy = "last_modified"
+)
+
+// Filter state tracking
+type FilterState struct {
+	QueryString string    // Current filter query as a string
+	CachedPage  int       // Current page stored in cache
+	Cache       []Contact // Cache to store pre-fetched contacts
+	TotalPages  int       // Total number of pages for the current filter
+	TotalCount  int64     // Total number of contacts matching the current filter
+	UpdateCache bool      // Do we need to refresh the cache due to changes in the DB
+	Query       *gorm.DB  // The gorm.DB query object used for the current filter
+}
+
+type PaginatedContacts struct {
+	Contacts    []Contact `json:"contacts"`
+	TotalPages  int       `json:"total_pages"`  // Based on current filter and pagination settings
+	CurrentPage int       `json:"current_page"` // Current page number being served
+	TotalCount  int64     `json:"total_count"`  // Total contacts that match the filter criteria
 }
 
 func (c Contact) String() string {
@@ -33,7 +61,8 @@ func (c Contact) String() string {
 // DB interaction interface
 type ContactRepository interface {
 	AddContact(contact Contact) error
-	GetContacts(page int) error
+	FilterContacts(filters map[string]string) (*gorm.DB, int64, error)
+	SearchContacts(query *gorm.DB, page int, sortBy SortBy, initialFetch bool) ([]Contact, error)
 	GetAllContacts()
 	UpdateContact(id int, contact Contact) error
 	DeleteContact(id int) error
