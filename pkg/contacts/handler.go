@@ -2,6 +2,7 @@
 package contacts
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"golangphonebook/internal"
@@ -45,7 +46,88 @@ func PutContact(w http.ResponseWriter, r *http.Request, repo ContactRepository) 
 	// Return an updated first page, maybe. Return contact itself. Or when user adds a contact, send them back to their origin page, or to page 1 of their contacts
 }
 
+func PutContacts(w http.ResponseWriter, r *http.Request, repo ContactRepository) {
+	defer internal.Timer("PutContacts")()
+
+	// Decode JSON array from request body
+	var contacts []json.RawMessage
+	if err := json.NewDecoder(r.Body).Decode(&contacts); err != nil {
+		internal.Logger.Error(fmt.Sprintf("Received invalid body in AddContacts method: %v", err))
+		http.Error(w, "Invalid request body. Please provide a valid JSON array of contacts.", http.StatusBadRequest)
+		return
+	}
+
+	// Check if the number of contacts exceeds the allowed limit
+	if len(contacts) > 20 {
+		http.Error(w, "Cannot add more than 20 contacts at a time", http.StatusBadRequest)
+		return
+	}
+
+	var failedContacts []string
+	var failedErrors []string
+	successfulContacts := 0
+
+	// Iterate over each contact and attempt to add them to the database
+	for _, contactJSON := range contacts {
+		// Create a new request with the contact JSON
+		req, err := http.NewRequest("POST", "", bytes.NewReader(contactJSON))
+		if err != nil {
+			internal.Logger.Error(fmt.Sprintf("Failed to create request for contact: %v", err))
+			failedContacts = append(failedContacts, string(contactJSON))
+			failedErrors = append(failedErrors, "Failed to create request for contact")
+			continue
+		}
+
+		contact, err := decodeBodyToContact(req)
+		if err != nil {
+			internal.Logger.Warn(fmt.Sprintf("Failed to decode and validate contact: %v", err))
+			failedContacts = append(failedContacts, string(contactJSON))
+			failedErrors = append(failedErrors, fmt.Sprintf("Validation error: %v", err))
+			continue
+		}
+
+		if err := repo.AddContact(*contact); err != nil {
+			internal.Logger.Error(fmt.Sprintf("Failed to add contact: %v, error: %v", contact, err))
+			failedContacts = append(failedContacts, string(contactJSON))
+			failedErrors = append(failedErrors, fmt.Sprintf("Database error: %v", err))
+			continue
+		}
+
+		successfulContacts++
+	}
+
+	// Update cache if any contacts were added successfully
+	if successfulContacts > 0 {
+		filterState.UpdateCache = true
+		internal.Logger.Info(fmt.Sprintf("%d contacts added to DB successfully", successfulContacts))
+	}
+
+	// Prepare response
+	response := map[string]interface{}{
+		"successful_contacts": successfulContacts,
+		"failed_contacts":     failedContacts,
+		"errors":              failedErrors,
+	}
+
+	// Set appropriate status code based on success/failure
+	if len(failedContacts) > 0 && successfulContacts == 0 {
+		w.WriteHeader(http.StatusBadRequest)
+	} else if len(failedContacts) > 0 && successfulContacts > 0 {
+		w.WriteHeader(http.StatusPartialContent)
+	} else {
+		w.WriteHeader(http.StatusOK)
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	if err := json.NewEncoder(w).Encode(response); err != nil {
+		internal.Logger.Error(fmt.Sprintf("Failed to encode response: %v", err))
+		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+	}
+}
+
 func GetContacts(w http.ResponseWriter, r *http.Request, repo ContactRepository) {
+	defer internal.Timer("GetContacts")()
+
 	pageStr := r.URL.Query().Get("page")
 	ascDec := r.URL.Query().Get("asc_dec")
 	sortByStr := r.URL.Query().Get("sort_by")
@@ -186,6 +268,8 @@ func GetContacts(w http.ResponseWriter, r *http.Request, repo ContactRepository)
 }
 
 func UpdateContact(w http.ResponseWriter, r *http.Request, repo ContactRepository) {
+	defer internal.Timer("UpdateContact")()
+
 	// Extract ID from  URL path /deleteContact/{id}
 	vars := mux.Vars(r)
 	id, err := strconv.Atoi(vars["id"])

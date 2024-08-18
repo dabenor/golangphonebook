@@ -26,6 +26,7 @@ func main() {
 	router := mux.NewRouter()
 	// C
 	router.HandleFunc("/addContact", func(w http.ResponseWriter, r *http.Request) { contacts.PutContact(w, r, repo) }).Methods("PUT")
+	router.HandleFunc("/addContacts", func(w http.ResponseWriter, r *http.Request) { contacts.PutContacts(w, r, repo) }).Methods("PUT")
 	// R
 	router.HandleFunc("/getContacts", func(w http.ResponseWriter, r *http.Request) { contacts.GetContacts(w, r, repo) }).Methods("GET")
 	// U
