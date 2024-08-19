@@ -185,62 +185,7 @@ You will receive an array of no more than 10 contacts, followed by pagination me
             "address": "101 Oak St",
             "last_modified": "2024-08-18T23:02:29.108775Z"
         },
-        {
-            "id": 65,
-            "first_name": "Diana",
-            "last_name": "Prince",
-            "phone": "+3422220123",
-            "address": "123 Birch St",
-            "last_modified": "2024-08-18T23:02:29.112228Z"
-        },
-        {
-            "id": 66,
-            "first_name": "Eve",
-            "last_name": "Polastri",
-            "phone": "+3422220456",
-            "address": "456 Cedar St",
-            "last_modified": "2024-08-18T23:02:29.117805Z"
-        },
-        {
-            "id": 67,
-            "first_name": "Frank",
-            "last_name": "Castle",
-            "phone": "+3422220789",
-            "address": "789 Pine St",
-            "last_modified": "2024-08-18T23:02:29.123378Z"
-        },
-        {
-            "id": 68,
-            "first_name": "Grace",
-            "last_name": "Hopper",
-            "phone": "+3422220110",
-            "address": "101 Spruce St",
-            "last_modified": "2024-08-18T23:02:29.126691Z"
-        },
-        {
-            "id": 27,
-            "first_name": "Jane",
-            "last_name": "Smith",
-            "phone": "+1234567892",
-            "address": "456 Elm St",
-            "last_modified": "2024-08-18T20:56:15.443351Z"
-        },
-        {
-            "id": 69,
-            "first_name": "Jo",
-            "last_name": "Cena",
-            "phone": "+3422220123",
-            "address": "123 Main St",
-            "last_modified": "2024-08-18T23:04:05.977963Z"
-        },
-        {
-            "id": 26,
-            "first_name": "John",
-            "last_name": "Doe",
-            "phone": "+1234567891",
-            "address": "123 Main St",
-            "last_modified": "2024-08-18T20:55:37.381925Z"
-        }
+        // 10 of these, cutting it off here for readability
     ],
     "total_pages": 5,
     "current_page": 1,
