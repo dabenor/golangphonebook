@@ -7,6 +7,7 @@ import (
 	"golangphonebook/db"
 	"golangphonebook/internal"
 	"golangphonebook/pkg/contacts"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -68,7 +69,31 @@ func testCreateContact(t *testing.T) {
 	contactJSON, err := json.Marshal(contact)
 	assert.NoError(t, err)
 
+	// First attempt to create the contact
 	resp, err := http.Post(testServer.URL+"/addContact", "application/json", bytes.NewBuffer(contactJSON))
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusOK, resp.StatusCode)
+
+	// Try entering the same contact again
+	resp, err = http.Post(testServer.URL+"/addContact", "application/json", bytes.NewBuffer(contactJSON))
+	assert.NoError(t, err)                                  // No network or request error
+	assert.Equal(t, http.StatusBadRequest, resp.StatusCode) // Expecting a 400 Bad Request
+
+	// Read the response body
+	body, err := io.ReadAll(resp.Body)
+	assert.NoError(t, err)
+	resp.Body.Close()
+
+	// Check if the body contains the expected error message
+	assert.Contains(t, string(body), "contact with the same full name and phone number already exists")
+
+	// Create a second contact with a different first name, should enter fine.
+	// People have the same numbers sometimes (work number, some couples have calls routed to each of their phones)
+	contact.FirstName = "Allison"
+	contactJSON, err = json.Marshal(contact)
+	assert.NoError(t, err)
+
+	resp, err = http.Post(testServer.URL+"/addContact", "application/json", bytes.NewBuffer(contactJSON))
 	assert.NoError(t, err)
 	assert.Equal(t, http.StatusOK, resp.StatusCode)
 }
