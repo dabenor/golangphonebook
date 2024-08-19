@@ -319,8 +319,8 @@ func testSearchContactsWithUpdates(t *testing.T) {
 		{FirstName: "Jane", LastName: "Smith", Phone: "+1234567892", Address: "456 Elm St"},
 	}
 
-	// Fill up the list with 33 more unique contacts (total 35)
-	for i := 3; i <= 35; i++ {
+	// Fill up the list with 29 more unique contacts (total 31)
+	for i := 3; i <= 31; i++ {
 		contact := contacts.Contact{
 			FirstName: fmt.Sprintf("Person%d", i),
 			LastName:  fmt.Sprintf("Last%d", i),
@@ -349,7 +349,43 @@ func testSearchContactsWithUpdates(t *testing.T) {
 	err = json.NewDecoder(resp.Body).Decode(&paginatedContacts)
 	assert.NoError(t, err)
 	assert.Equal(t, 10, len(paginatedContacts.Contacts))
-	assert.Equal(t, 4, paginatedContacts.TotalPages) // Expecting 4 pages (35 contacts total)
+	assert.Equal(t, 4, paginatedContacts.TotalPages) // Expecting 4 pages (31 contacts total)
+
+	// Test pagination: test negative page
+	resp, err = http.Get(testServer.URL + "/getContacts?page=-1423")
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusOK, resp.StatusCode)
+
+	// Test negative page, should receive page 1
+	err = json.NewDecoder(resp.Body).Decode(&paginatedContacts)
+	assert.NoError(t, err)
+	assert.Equal(t, 10, len(paginatedContacts.Contacts))
+	assert.Equal(t, 4, paginatedContacts.TotalPages)  // Expecting 4 pages (31 contacts total)
+	assert.Equal(t, 1, paginatedContacts.CurrentPage) // Check that page 1 is served in this case
+
+	// Test pagination: test invalid format page
+	resp, err = http.Get(testServer.URL + "/getContacts?page=hahathisshouldjustgivemepage1")
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusOK, resp.StatusCode)
+
+	// Test negative page, should receive page 1
+	err = json.NewDecoder(resp.Body).Decode(&paginatedContacts)
+	assert.NoError(t, err)
+	assert.Equal(t, 10, len(paginatedContacts.Contacts))
+	assert.Equal(t, 4, paginatedContacts.TotalPages)  // Expecting 4 pages (31 contacts total)
+	assert.Equal(t, 1, paginatedContacts.CurrentPage) // Check that page 1 is served in this case
+
+	// Test pagination: get page 4, then delete a thing to bring it to 3 pages. It should return page 1
+	resp, err = http.Get(testServer.URL + "/getContacts?page=4")
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusOK, resp.StatusCode)
+
+	// Should receive page 4
+	err = json.NewDecoder(resp.Body).Decode(&paginatedContacts)
+	assert.NoError(t, err)
+	assert.Equal(t, 1, len(paginatedContacts.Contacts)) // Page 4 has 1 contact on it currently
+	assert.Equal(t, 4, paginatedContacts.TotalPages)    // Expecting 4 pages (31 contacts total)
+	assert.Equal(t, 4, paginatedContacts.CurrentPage)   // Check that page 1 is served in this case
 
 	// Delete a contact :(, bye bye Person3
 	req, err := http.NewRequest(http.MethodDelete, testServer.URL+"/deleteContact/3", nil)
@@ -360,16 +396,15 @@ func testSearchContactsWithUpdates(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, http.StatusOK, resp.StatusCode)
 
-	// // Test pagination: Get the second page (next 10 contacts), should not refer to cache
-	// resp, err = http.Get(testServer.URL + "/getContacts?page=2")
-	// assert.NoError(t, err)
-	// assert.Equal(t, http.StatusOK, resp.StatusCode)
+	// Test pagination: Get the second page (next 10 contacts), should not refer to cache
+	resp, err = http.Get(testServer.URL + "/getContacts?page=4")
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusOK, resp.StatusCode)
 
-	// err = json.NewDecoder(resp.Body).Decode(&paginatedContacts)
-	// assert.NoError(t, err)
-	// assert.Equal(t, 10, len(paginatedContacts.Contacts))
-	// assert.Equal(t, 34, paginatedContacts.TotalCount)
-	// assert.Equal(t, 4, paginatedContacts.TotalPages) // Still expecting 4 pages
+	err = json.NewDecoder(resp.Body).Decode(&paginatedContacts)
+	assert.NoError(t, err)
+	assert.Equal(t, 10, len(paginatedContacts.Contacts)) // 10 contacts since it's returning page 1
+	assert.Equal(t, 3, paginatedContacts.TotalPages)     // Now expecting 3 pages for 30 contacts
 
 	// // Test pagination: Get the third page (next 10 contacts)
 	// resp, err = http.Get(testServer.URL + "/getContacts?page=3")
