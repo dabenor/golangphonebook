@@ -154,7 +154,7 @@ address=main street
 
 
 Response Format:
-You will receive an array of contacts, followed by pagination metadata. 
+You will receive an array of no more than 10 contacts, followed by pagination metadata. 
 - total_pages is the number of pages of contacts for the current query
 - current_page is the page of results returned to the client
 - total_count is the total number of records in the Phonebook that match the filters. That's only affected by adjusting the filter parameters
@@ -247,3 +247,36 @@ You will receive an array of contacts, followed by pagination metadata.
     "total_count": 41
 }
 ```
+
+### Update Contact
+
+- **Endpoint**: `/updateContact/{id}`
+- **Method**: POST
+- **Description**: Update the contact with the specified ID.
+
+#### Request Body
+
+- An JSON contact to add. The JSON object should include at least the 'first_name' and 'phone' fields. Optional fields that can also be populated later are 'last_name' and 'address'. The first_name, last_name, and phone cannot be the same as a contact already in the database. You receive the IDs of a contact to delete from the [Get Contacts](#get-contacts) endpoint. The ID is set by the database, and is unique to each contact. This way, you can be sure you are updating the right contact in the database.
+
+**Example Request URL**:
+
+To update contact 3, send a request to this URL with an updated Contact request body as shown below
+https://localhost:8443/updateContact/3
+
+**Example Request Body**:
+
+```json
+{
+    "first_name": "John",
+    "last_name": "Doe",
+    "phone": "+1234567890",
+    "address": "123 Main St"
+}
+```
+
+**Responses:**
+- 200 OK: Contact updated successfully.
+- 400 Bad Request: Invalid request body, first name and phone must be correctly defined
+- 400 Bad Request: another contact with the same first name, last name, and phone number already exists
+- 500 Internal Server Error: Failed to update contact due to an internal server error
+
