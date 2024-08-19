@@ -328,7 +328,7 @@ func DeleteContact(w http.ResponseWriter, r *http.Request, repo ContactRepositor
 		if err.Error() == "no contact found with the given ID" {
 			http.Error(w, err.Error(), http.StatusNotFound)
 		} else {
-			http.Error(w, "Failed to delete contact", http.StatusInternalServerError)
+			http.Error(w, "failed to delete contact", http.StatusInternalServerError)
 		}
 		return
 	}

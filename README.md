@@ -256,7 +256,7 @@ You will receive an array of no more than 10 contacts, followed by pagination me
 
 #### Request Body
 
-- An JSON contact to add. The JSON object should include at least the 'first_name' and 'phone' fields. Optional fields that can also be populated later are 'last_name' and 'address'. The first_name, last_name, and phone cannot be the same as a contact already in the database. You receive the IDs of a contact to delete from the [Get Contacts](#get-contacts) endpoint. The ID is set by the database, and is unique to each contact. This way, you can be sure you are updating the right contact in the database.
+- An JSON contact to add. The JSON object should include at least the 'first_name' and 'phone' fields. Optional fields that can also be populated later are 'last_name' and 'address'. The first_name, last_name, and phone cannot be the same as a contact already in the database. You receive the IDs of a contact to update from the [Get Contacts](#get-contacts) endpoint. The ID is set by the database, and is unique to each contact. This way, you can be sure you are updating the right contact in the database.
 
 **Example Request URL**:
 
@@ -279,4 +279,26 @@ https://localhost:8443/updateContact/3
 - 400 Bad Request: Invalid request body, first name and phone must be correctly defined
 - 400 Bad Request: another contact with the same first name, last name, and phone number already exists
 - 500 Internal Server Error: Failed to update contact due to an internal server error
+
+### Delete Contact
+
+- **Endpoint**: `/deleteContact/{id}`
+- **Method**: DELETE
+- **Description**: Delete the contact with the specified ID. ID must be an integer
+
+#### Request Body
+
+- Blank/ignored
+
+**Example Request URL**:
+
+To delete contact with ID 3, send a request to this URL
+https://localhost:8443/deleteContact/3
+
+
+**Responses:**
+- 200 OK: Contact deleted successfully.
+- 400 Bad Request: Invalid ID, IDs can only be integers
+- 404 Not Found: no contact found with the given ID
+- 500 Internal Server Error: failed to delete contact
 
