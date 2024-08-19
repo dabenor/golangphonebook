@@ -349,17 +349,16 @@ func testSearchContactsWithUpdates(t *testing.T) {
 	err = json.NewDecoder(resp.Body).Decode(&paginatedContacts)
 	assert.NoError(t, err)
 	assert.Equal(t, 10, len(paginatedContacts.Contacts))
-	assert.Equal(t, 35, paginatedContacts.TotalCount)
-	// assert.Equal(t, 4, paginatedContacts.TotalPages) // Expecting 4 pages (35 contacts total)
+	assert.Equal(t, 4, paginatedContacts.TotalPages) // Expecting 4 pages (35 contacts total)
 
-	// // Delete a contact :(, bye bye Person3
-	// req, err := http.NewRequest(http.MethodDelete, testServer.URL+"/deleteContact/3", nil)
-	// assert.NoError(t, err)
+	// Delete a contact :(, bye bye Person3
+	req, err := http.NewRequest(http.MethodDelete, testServer.URL+"/deleteContact/3", nil)
+	assert.NoError(t, err)
 
-	// client := &http.Client{}
-	// resp, err = client.Do(req)
-	// assert.NoError(t, err)
-	// assert.Equal(t, http.StatusOK, resp.StatusCode)
+	client := &http.Client{}
+	resp, err = client.Do(req)
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusOK, resp.StatusCode)
 
 	// // Test pagination: Get the second page (next 10 contacts), should not refer to cache
 	// resp, err = http.Get(testServer.URL + "/getContacts?page=2")
