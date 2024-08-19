@@ -85,7 +85,7 @@ Then you can access the application by sending CURL requests to [https://localho
 
 - **Endpoint**: `/addContacts`
 - **Method**: PUT
-- **Description**: Creates multiple new contacts based on the provided JSON array.
+- **Description**: Creates up to 20 new contacts based on the provided JSON array.
 
 #### Request Body
 
@@ -121,7 +121,7 @@ Then you can access the application by sending CURL requests to [https://localho
 
 #### Request Body
 
-- blank
+- blank/ignored
 
 #### Parameters
 
@@ -247,3 +247,29 @@ https://localhost:8443/deleteContact/3
 - 404 Not Found: no contact found with the given ID
 - 500 Internal Server Error: failed to delete contact
 
+
+### Delete Contacts
+
+- **Endpoint**: `/deleteContacts/{ids}`
+- **Method**: DELETE
+- **Description**: Delete up to 20 contacts at once based on the the list of comma separated ints passed in as {ids} in the URL.
+
+This function is less tolerant than [Add Contacts](#add-contacts) because we want to be sure that the user knows what they're deleting. Also, there is more room for error in the `/addContacts` endpoint above, as those have elaborate json requirements that do not exist for `/deleteContacts`. Once we encounter an invalid ID, we abort the method and return an error. We delete until that point though.
+
+Say you pass in IDs 3, 5, 7, and 10, and ID 7 is not in the DB, the `/deleteContacts` method will only remove IDs 3 and 5, even if 10 is a valid ID to delete.
+
+#### Request Body
+
+- blank/ignored
+
+**Example Request URL**:
+To delete IDs 3, 5, 7, and 10, pass the following into the service
+https://localhost:8443/deleteContact/3,5,7,10
+
+
+- 200 OK: Contacts added successfully.
+- 400 Bad Request: No IDs provided
+- 400 Bad Request: Cannot delete more than 20 contacts at a time.
+- 400 Bad Request: Invalid IDs: {list of invalid IDs}. IDs can only be integers.
+- 404 Bad Request: No contact found with ID {id}
+- 500 Internal Server Error: Failed to delete contact with ID {id}
