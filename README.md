@@ -13,7 +13,7 @@ Next, close the docker build once the tests are complete by pressing Ctrl+C, and
 ```bash
 docker-compose down
 ```
-To then run the resulting Docker build and expose port 8443, please run the following, also from the root directory
+To then run the resulting Docker build from the test and expose port 8443, please run the following, also from the root directory
 
 ```bash
 docker-compose up db phonebook
