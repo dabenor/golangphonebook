@@ -2,11 +2,15 @@
 package main
 
 import (
+	"crypto/tls"
+	"crypto/x509"
 	"fmt"
 	"golangphonebook/db"
 	"golangphonebook/internal"
 	"golangphonebook/pkg/contacts"
+	"log"
 	"net/http"
+	"os"
 
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
@@ -34,9 +38,40 @@ func main() {
 	// D
 	router.HandleFunc("/deleteContact/{id}", func(w http.ResponseWriter, r *http.Request) { contacts.DeleteContact(w, r, repo) }).Methods("DELETE")
 	router.HandleFunc("/deleteContacts", func(w http.ResponseWriter, r *http.Request) { contacts.DeleteContacts(w, r, repo) }).Methods("DELETE")
-	// Add router for dynamic routes
-	http.Handle("/", router)
+	// // Add router for dynamic routes
+	// http.Handle("/", router)
 
-	internal.Logger.Info("Ready to take requests:\n")
-	http.ListenAndServe(":8080", nil)
+	// Load the server's certificate and private key
+	cert, err := tls.LoadX509KeyPair("certs/server.crt", "certs/server.key")
+	if err != nil {
+		log.Fatalf("Failed to load server certificate and key: %v", err)
+	}
+
+	clientCACert, err := os.ReadFile("certs/ca.crt")
+	if err != nil {
+		log.Fatalf("Failed to load client CA certificate: %v", err)
+	}
+
+	clientCAPool := x509.NewCertPool()
+	clientCAPool.AppendCertsFromPEM(clientCACert)
+
+	// Configure TLS with client certificate verification
+	tlsConfig := &tls.Config{
+		Certificates: []tls.Certificate{cert},
+		ClientCAs:    clientCAPool,
+		ClientAuth:   tls.RequireAndVerifyClientCert,
+	}
+
+	server := &http.Server{
+		Addr:      ":8443",
+		Handler:   router,
+		TLSConfig: tlsConfig,
+	}
+
+	internal.Logger.Info("Ready to take secure requests on https://localhost:8443\n")
+	err = server.ListenAndServeTLS("", "")
+	if err != nil {
+		log.Fatalf("Failed to start HTTPS server: %v", err)
+	}
+
 }

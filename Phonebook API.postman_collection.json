@@ -22,12 +22,12 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:8080/addContact",
-					"protocol": "http",
+					"raw": "https://localhost:8443/addContact",
+					"protocol": "https",
 					"host": [
 						"localhost"
 					],
-					"port": "8080",
+					"port": "8443",
 					"path": [
 						"addContact"
 					]
@@ -42,7 +42,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "// Use this to add up to 20 contacts at once. Wow!\r\n[\r\n    {\r\n        \"first_name\": \"John\",\r\n        \"last_name\": \"Cena\",\r\n        \"phone\": \"+3422220123\",\r\n        \"address\": \"123 Main St\"\r\n    },\r\n    {\r\n        \"first_name\": \"Alice\",\r\n        \"last_name\": \"Wonderland\",\r\n        \"phone\": \"+3422220456\",\r\n        \"address\": \"456 Elm St\"\r\n    },\r\n    {\r\n        \"first_name\": \"Bob\",\r\n        \"last_name\": \"Builder\",\r\n        \"phone\": \"+3422220789\",\r\n        \"address\": \"789 Maple St\"\r\n    },\r\n    {\r\n        \"first_name\": \"Charlie\",\r\n        \"last_name\": \"Chaplin\",\r\n        \"phone\": \"+3422220110\",\r\n        \"address\": \"101 Oak St\"\r\n    },\r\n    {\r\n        \"first_name\": \"Diana\",\r\n        \"last_name\": \"Prince\",\r\n        \"phone\": \"+3422220123\",\r\n        \"address\": \"123 Birch St\"\r\n    },\r\n    {\r\n        \"first_name\": \"Eve\",\r\n        \"last_name\": \"Polastri\",\r\n        \"phone\": \"+3422220456\",\r\n        \"address\": \"456 Cedar St\"\r\n    },\r\n    {\r\n        \"first_name\": \"Frank\",\r\n        \"last_name\": \"Castle\",\r\n        \"phone\": \"+3422220789\",\r\n        \"address\": \"789 Pine St\"\r\n    },\r\n    {\r\n        \"first_name\": \"Grace\",\r\n        \"last_name\": \"Hopper\",\r\n        \"phone\": \"+3422220110\",\r\n        \"address\": \"101 Spruce St\"\r\n    }\r\n]\r\n",
+					"raw": "// Use this to add up to 20 contacts at once. Wow!\r\n[\r\n    {\r\n        \"first_name\": \"Jo\",\r\n        \"last_name\": \"Cena\",\r\n        \"phone\": \"+3422220123\",\r\n        \"address\": \"123 Main St\"\r\n    },\r\n    {\r\n        \"first_name\": \"Alice\",\r\n        \"last_name\": \"Wonderland\",\r\n        \"phone\": \"+3422220456\",\r\n        \"address\": \"456 Elm St\"\r\n    },\r\n    {\r\n        \"first_name\": \"Bob\",\r\n        \"last_name\": \"Builder\",\r\n        \"phone\": \"+3422220789\",\r\n        \"address\": \"789 Maple St\"\r\n    },\r\n    {\r\n        \"first_name\": \"Charlie\",\r\n        \"last_name\": \"Chaplin\",\r\n        \"phone\": \"+3422220110\",\r\n        \"address\": \"101 Oak St\"\r\n    },\r\n    {\r\n        \"first_name\": \"Diana\",\r\n        \"last_name\": \"Prince\",\r\n        \"phone\": \"+3422220123\",\r\n        \"address\": \"123 Birch St\"\r\n    },\r\n    {\r\n        \"first_name\": \"Eve\",\r\n        \"last_name\": \"Polastri\",\r\n        \"phone\": \"+3422220456\",\r\n        \"address\": \"456 Cedar St\"\r\n    },\r\n    {\r\n        \"first_name\": \"Frank\",\r\n        \"last_name\": \"Castle\",\r\n        \"phone\": \"+3422220789\",\r\n        \"address\": \"789 Pine St\"\r\n    },\r\n    {\r\n        \"first_name\": \"Grace\",\r\n        \"last_name\": \"Hopper\",\r\n        \"phone\": \"+3422220110\",\r\n        \"address\": \"101 Spruce St\"\r\n    }\r\n]\r\n",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -98,15 +98,15 @@
 				"method": "DELETE",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:8080/deleteContact/4",
-					"protocol": "http",
+					"raw": "https://localhost:8443/deleteContact/20",
+					"protocol": "https",
 					"host": [
 						"localhost"
 					],
-					"port": "8080",
+					"port": "8443",
 					"path": [
 						"deleteContact",
-						"4"
+						"20"
 					]
 				}
 			},
@@ -118,12 +118,12 @@
 				"method": "DELETE",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:8080/deleteContacts?ids=37,38,39",
-					"protocol": "http",
+					"raw": "https://localhost:8443/deleteContacts?ids=37,38,39",
+					"protocol": "https",
 					"host": [
 						"localhost"
 					],
-					"port": "8080",
+					"port": "8443",
 					"path": [
 						"deleteContacts"
 					],
@@ -165,7 +165,7 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:8080/getContacts",
+					"raw": "http://localhost:8080/getContacts?page=1",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -177,7 +177,7 @@
 					"query": [
 						{
 							"key": "first_name",
-							"value": "person1",
+							"value": "Jo",
 							"disabled": true
 						},
 						{
@@ -187,7 +187,7 @@
 						},
 						{
 							"key": "phone",
-							"value": null,
+							"value": "3422",
 							"disabled": true
 						},
 						{
@@ -196,14 +196,13 @@
 							"disabled": true
 						},
 						{
-							"key": "page",
-							"value": "1",
-							"disabled": true
-						},
-						{
 							"key": "asc_dec",
 							"value": "asc",
 							"disabled": true
+						},
+						{
+							"key": "page",
+							"value": "1"
 						}
 					]
 				}

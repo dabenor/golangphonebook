@@ -13,13 +13,18 @@ Next, close the docker build once the tests are complete by pressing Ctrl+C, and
 ```bash
 docker-compose down
 ```
-To then run the resulting Docker build and expose port 8080, please run the following, also from the root directory
+To then run the resulting Docker build and expose port 8443, please run the following, also from the root directory
 
 ```bash
 docker-compose up db phonebook
 ```
 
-Then you can access the application by sending CURL requests to [http://localhost:8080/](http://localhost:8080/) from the terminal, via [Postman](https://www.postman.com/), or you can navigate to the same URL in your browser.
+This application is secured using ca signed certificates, so you'll need to import those into Postman. These certs were generated for this project only and are not meant to be used anywhere else. That would not be secure :)
+
+The certificate files are located at the paths /certs/ca.crt and /certs/ca.key, you should set them to be used when https://localhost:8443/ is hit from Postman. I provide a Postman collection in the root directory here that you can import to Postman that has all of the requests and parameters you could pass into this API.
+
+
+Then you can access the application by sending CURL requests to [https://localhost:8443/](https://localhost:8443/) from the terminal, via [Postman](https://www.postman.com/), or you can navigate to the same URL in your browser.
 
 
 ## Table of Contents
