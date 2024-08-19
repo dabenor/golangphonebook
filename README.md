@@ -8,7 +8,7 @@ To build and test this project, run the following from the root directory
 ```bash
 docker-compose up --build test
 ```
-Next, close the docker build once the tests are complete by pressing Ctrl+C, and then removing the test containers with the following command
+The test will exit with code 1 on a successful test. Next, close the docker build once the tests are complete by pressing Ctrl+C, and then removing the test containers with the following command
 
 ```bash
 docker-compose down
