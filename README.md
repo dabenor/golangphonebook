@@ -4,7 +4,7 @@ Experimenting with Go to create a WebServer API with basic CRUD operations
 
 ## Setup
 
-To build and test this project, run the following from the root directory
+To build and test this project, make sure you have Docker installed on your system and run the following from the root directory of the project
 ```bash
 docker-compose up --build test
 ```
@@ -13,7 +13,7 @@ The test will exit with code 1 on a successful test. Next, close the docker buil
 ```bash
 docker-compose down
 ```
-To then run the resulting Docker build from the test and expose port 8443, please run the following, also from the root directory
+To run the resulting Docker build from the test and expose port 8443, please run the following, also from the project root directory
 
 ```bash
 docker-compose up db phonebook
@@ -42,9 +42,10 @@ Then you can access the application by sending CURL requests to [https://localho
 ## Constraints
 
     - first_name: Pretty open, needs to exist on any JSON calls to update or add a contact
-    - last_name: Pretty open, optional in most cases
-    - phone: An optional + sign followed by between 4 and 20 digits 0-9
-    - address: Pretty open, optional in most cases
+    - last_name: Pretty open, optional parameter
+    - phone: An optional + sign followed by between 4 and 20 digits 0-9, needs to exist on any JSON calls to update or add a contact
+    - address: Pretty open, optional parameter
+    - page: for getContacts page, should be an integer in the range of total pages, tolerance built in, defaults to page 1 if invalid input
     - sort_by: only for getContacts function, can be first_name, last_name, or last_modified depedning on how you want to sort your results
     - asc_dec: only for getContacts function, can be asc or dec depending on whether you want results to be ascending or descending, by default ascending, except for last_modified, which by default is descending (so you can see most recent contacts)
     - page: only for getContacts function, used to tell the server what page of the results you want. If undefined or out of bounds due to a filter will automatically be set to 1
