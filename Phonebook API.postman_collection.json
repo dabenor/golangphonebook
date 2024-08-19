@@ -1,0 +1,214 @@
+{
+	"info": {
+		"_postman_id": "b03671ff-3da1-4d62-a07f-c742de9e0693",
+		"name": "Phonebook API",
+		"description": "Feel free to use these requests to interact with my phonebook!\n\nAll of the fields are there for each method, please refer to the documentation for details on what inputs are acceptable and expected behavior.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "26355744"
+	},
+	"item": [
+		{
+			"name": "Add Contact",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"first_name\": \"John\",\r\n    \"last_name\": \"Cena\",\r\n    \"phone\": \"+3422220123\",\r\n    \"address\": \"\"\r\n\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/addContact",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"addContact"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Add Contacts",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "// Use this to add up to 20 contacts at once. Wow!\r\n[\r\n    {\r\n        \"first_name\": \"John\",\r\n        \"last_name\": \"Cena\",\r\n        \"phone\": \"+3422220123\",\r\n        \"address\": \"123 Main St\"\r\n    },\r\n    {\r\n        \"first_name\": \"Alice\",\r\n        \"last_name\": \"Wonderland\",\r\n        \"phone\": \"+3422220456\",\r\n        \"address\": \"456 Elm St\"\r\n    },\r\n    {\r\n        \"first_name\": \"Bob\",\r\n        \"last_name\": \"Builder\",\r\n        \"phone\": \"+3422220789\",\r\n        \"address\": \"789 Maple St\"\r\n    },\r\n    {\r\n        \"first_name\": \"Charlie\",\r\n        \"last_name\": \"Chaplin\",\r\n        \"phone\": \"+3422220110\",\r\n        \"address\": \"101 Oak St\"\r\n    },\r\n    {\r\n        \"first_name\": \"Diana\",\r\n        \"last_name\": \"Prince\",\r\n        \"phone\": \"+3422220123\",\r\n        \"address\": \"123 Birch St\"\r\n    },\r\n    {\r\n        \"first_name\": \"Eve\",\r\n        \"last_name\": \"Polastri\",\r\n        \"phone\": \"+3422220456\",\r\n        \"address\": \"456 Cedar St\"\r\n    },\r\n    {\r\n        \"first_name\": \"Frank\",\r\n        \"last_name\": \"Castle\",\r\n        \"phone\": \"+3422220789\",\r\n        \"address\": \"789 Pine St\"\r\n    },\r\n    {\r\n        \"first_name\": \"Grace\",\r\n        \"last_name\": \"Hopper\",\r\n        \"phone\": \"+3422220110\",\r\n        \"address\": \"101 Spruce St\"\r\n    }\r\n]\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/addContacts",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"addContacts"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update Contact",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"first_name\": \"Daniel\",\r\n    \"last_name\": \"Ben-Or\",\r\n    \"phone\": \"14434490769\",\r\n    \"address\": \"\"\r\n\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/updateContact/12",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"updateContact",
+						"12"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete Contact",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/deleteContact/4",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"deleteContact",
+						"4"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete Contacts",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/deleteContacts?ids=37,38,39",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"deleteContacts"
+					],
+					"query": [
+						{
+							"key": "ids",
+							"value": "37,38,39"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Contacts",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/getContacts",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"getContacts"
+					],
+					"query": [
+						{
+							"key": "first_name",
+							"value": "person1",
+							"disabled": true
+						},
+						{
+							"key": "last_name",
+							"value": "",
+							"disabled": true
+						},
+						{
+							"key": "phone",
+							"value": null,
+							"disabled": true
+						},
+						{
+							"key": "address",
+							"value": "street",
+							"disabled": true
+						},
+						{
+							"key": "page",
+							"value": "1",
+							"disabled": true
+						},
+						{
+							"key": "asc_dec",
+							"value": "asc",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
