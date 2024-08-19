@@ -64,6 +64,78 @@
 			"response": []
 		},
 		{
+			"name": "Get Contacts",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/getContacts?page=1",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"getContacts"
+					],
+					"query": [
+						{
+							"key": "first_name",
+							"value": "Jo",
+							"disabled": true
+						},
+						{
+							"key": "last_name",
+							"value": "",
+							"disabled": true
+						},
+						{
+							"key": "phone",
+							"value": "3422",
+							"disabled": true
+						},
+						{
+							"key": "address",
+							"value": "street",
+							"disabled": true
+						},
+						{
+							"key": "asc_dec",
+							"value": "asc",
+							"disabled": true
+						},
+						{
+							"key": "page",
+							"value": "1"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "Update Contact",
 			"request": {
 				"method": "POST",
@@ -131,78 +203,6 @@
 						{
 							"key": "ids",
 							"value": "37,38,39"
-						}
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Get Contacts",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							""
-						],
-						"type": "text/javascript",
-						"packages": {}
-					}
-				},
-				{
-					"listen": "prerequest",
-					"script": {
-						"exec": [
-							""
-						],
-						"type": "text/javascript",
-						"packages": {}
-					}
-				}
-			],
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "http://localhost:8080/getContacts?page=1",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "8080",
-					"path": [
-						"getContacts"
-					],
-					"query": [
-						{
-							"key": "first_name",
-							"value": "Jo",
-							"disabled": true
-						},
-						{
-							"key": "last_name",
-							"value": "",
-							"disabled": true
-						},
-						{
-							"key": "phone",
-							"value": "3422",
-							"disabled": true
-						},
-						{
-							"key": "address",
-							"value": "street",
-							"disabled": true
-						},
-						{
-							"key": "asc_dec",
-							"value": "asc",
-							"disabled": true
-						},
-						{
-							"key": "page",
-							"value": "1"
 						}
 					]
 				}
