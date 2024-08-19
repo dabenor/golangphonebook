@@ -251,9 +251,9 @@ https://localhost:8443/deleteContact/3
 
 ### Delete Contacts
 
-- **Endpoint**: `/deleteContacts/{ids}`
+- **Endpoint**: `/deleteContacts`
 - **Method**: DELETE
-- **Description**: Delete up to 20 contacts at once based on the the list of comma separated ints passed in as {ids} in the URL.
+- **Description**: Delete up to 20 contacts at once based on the the list of comma separated ints passed in as the `ids` parameter.
 
 This function is less tolerant than [Add Contacts](#add-contacts) because we want to be sure that the user knows what they're deleting. Also, there is more room for error in the `/addContacts` endpoint above, as those have elaborate json requirements that do not exist for `/deleteContacts`. Once we encounter an invalid ID, we abort the method and return an error. We delete until that point though.
 
@@ -262,6 +262,10 @@ Say you pass in IDs 3, 5, 7, and 10, and ID 7 is not in the DB, the `/deleteCont
 #### Request Body
 
 - blank/ignored
+
+#### Request Parameters
+
+- `ids`: IDs to delete from the DB
 
 **Example Request URL**:
 To delete IDs 3, 5, 7, and 10, pass the following into the service

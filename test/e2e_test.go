@@ -36,12 +36,16 @@ func setupRouter() *mux.Router {
 	router.HandleFunc("/updateContact/{id}", func(w http.ResponseWriter, r *http.Request) { contacts.UpdateContact(w, r, repo) }).Methods("POST")
 	// D
 	router.HandleFunc("/deleteContact/{id}", func(w http.ResponseWriter, r *http.Request) { contacts.DeleteContact(w, r, repo) }).Methods("DELETE")
+	router.HandleFunc("/deleteContacts", func(w http.ResponseWriter, r *http.Request) { contacts.DeleteContacts(w, r, repo) }).Methods("DELETE")
 	return router
 }
 
 func TestE2E(t *testing.T) {
 	setupTestServer()
 	t.Run("CreateContact", testCreateContact)
+
+	setupTestServer()
+	t.Run("PutContacts", testPutContacts)
 
 	resetDatabase()
 	t.Run("GetContact", testGetContact)
@@ -51,6 +55,9 @@ func TestE2E(t *testing.T) {
 
 	resetDatabase()
 	t.Run("DeleteContact", testDeleteContact)
+
+	resetDatabase()
+	t.Run("DeleteContacts", testDeleteContacts)
 
 	resetDatabase()
 	t.Run("SearchContacts", testSearchContacts)
@@ -99,7 +106,7 @@ func testCreateContact(t *testing.T) {
 	assert.Equal(t, http.StatusOK, resp.StatusCode)
 }
 
-func TestPutContacts(t *testing.T) {
+func testPutContacts(t *testing.T) {
 	router := setupRouter()
 
 	// Define valid contacts
@@ -280,6 +287,76 @@ func testDeleteContact(t *testing.T) {
 	resp, err = client.Do(req)
 	assert.NoError(t, err)
 	assert.Equal(t, http.StatusOK, resp.StatusCode)
+}
+
+func testDeleteContacts(t *testing.T) {
+	router := setupRouter()
+
+	// Step 1: Add four contacts to have something to delete
+	t.Run("AddContactsForDeletion", func(t *testing.T) {
+		contactsToAdd := []contacts.Contact{
+			{
+				FirstName: "John",
+				LastName:  "Doe",
+				Phone:     "+1234567890",
+				Address:   "123 Main St",
+			},
+			{
+				FirstName: "Jane",
+				LastName:  "Smith",
+				Phone:     "+9876543210",
+				Address:   "456 Elm St",
+			},
+			{
+				FirstName: "Emily",
+				LastName:  "Johnson",
+				Phone:     "+1122334455",
+				Address:   "789 Oak St",
+			},
+			{
+				FirstName: "Alice",
+				LastName:  "Brown",
+				Phone:     "+4455667788",
+				Address:   "101 Pine St",
+			},
+		}
+
+		contactsJSON, err := json.Marshal(contactsToAdd)
+		assert.NoError(t, err)
+
+		req, err := http.NewRequest("POST", "/addContacts", bytes.NewBuffer(contactsJSON))
+		assert.NoError(t, err)
+		req.Header.Set("Content-Type", "application/json")
+
+		rr := httptest.NewRecorder()
+		router.ServeHTTP(rr, req)
+
+		assert.Equal(t, http.StatusOK, rr.Code)
+	})
+
+	// Step 2: Test deleting contacts 1, 2, 3
+	t.Run("DeleteValidContacts", func(t *testing.T) {
+		req, err := http.NewRequest("DELETE", "/deleteContacts?ids=1,2,3", nil)
+		assert.NoError(t, err)
+
+		rr := httptest.NewRecorder()
+		router.ServeHTTP(rr, req)
+
+		assert.Equal(t, http.StatusOK, rr.Code)
+		assert.Equal(t, "Contacts deleted successfully", rr.Body.String())
+	})
+
+	// Step 3: Test deleting contacts 1, 4 (with 1 failing)
+	t.Run("DeleteMixedContacts", func(t *testing.T) {
+		req, err := http.NewRequest("DELETE", "/deleteContacts?ids=1,4", nil)
+		assert.NoError(t, err)
+
+		rr := httptest.NewRecorder()
+		router.ServeHTTP(rr, req)
+
+		assert.Equal(t, http.StatusNotFound, rr.Code)
+		assert.Contains(t, rr.Body.String(), "No contact found with ID 1")
+	})
 }
 
 func testSearchContacts(t *testing.T) {
