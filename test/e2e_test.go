@@ -74,6 +74,16 @@ func testCreateContact(t *testing.T) {
 }
 
 func testGetContact(t *testing.T) {
+	// Retrieve nonexistent contact
+	resp, err := http.Get(testServer.URL + "/getContacts?page=1")
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusOK, resp.StatusCode)
+
+	var paginatedContacts contacts.PaginatedContacts
+	err = json.NewDecoder(resp.Body).Decode(&paginatedContacts)
+	assert.NoError(t, err)
+	assert.Equal(t, len(paginatedContacts.Contacts), 0)
+
 	// Create a contact first
 	contact := contacts.Contact{
 		FirstName: "John",
@@ -85,7 +95,7 @@ func testGetContact(t *testing.T) {
 	contactJSON, err := json.Marshal(contact)
 	assert.NoError(t, err)
 
-	resp, err := http.Post(testServer.URL+"/addContact", "application/json", bytes.NewBuffer(contactJSON))
+	resp, err = http.Post(testServer.URL+"/addContact", "application/json", bytes.NewBuffer(contactJSON))
 	assert.NoError(t, err)
 	assert.Equal(t, http.StatusOK, resp.StatusCode)
 
@@ -94,7 +104,6 @@ func testGetContact(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, http.StatusOK, resp.StatusCode)
 
-	var paginatedContacts contacts.PaginatedContacts
 	err = json.NewDecoder(resp.Body).Decode(&paginatedContacts)
 	assert.NoError(t, err)
 	assert.GreaterOrEqual(t, len(paginatedContacts.Contacts), 1)
@@ -405,6 +414,7 @@ func testSearchContactsWithUpdates(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, 10, len(paginatedContacts.Contacts)) // 10 contacts since it's returning page 1
 	assert.Equal(t, 3, paginatedContacts.TotalPages)     // Now expecting 3 pages for 30 contacts
+	assert.Equal(t, 1, paginatedContacts.CurrentPage)    // Check that page 1 is served in this case
 
 	// // Test pagination: Get the third page (next 10 contacts)
 	// resp, err = http.Get(testServer.URL + "/getContacts?page=3")
