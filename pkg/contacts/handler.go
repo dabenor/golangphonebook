@@ -110,6 +110,8 @@ func PutContacts(w http.ResponseWriter, r *http.Request, repo ContactRepository)
 	}
 
 	// Set appropriate status code based on success/failure
+	internal.Logger.Info(fmt.Sprintf("Successful: %d, Failed: %d", successfulContacts, len(failedContacts)))
+
 	if len(failedContacts) > 0 && successfulContacts == 0 {
 		w.WriteHeader(http.StatusBadRequest)
 	} else if len(failedContacts) > 0 && successfulContacts > 0 {

@@ -108,6 +108,7 @@ Then you can access the application by sending CURL requests to [https://localho
 ]
 ```
 - 200 OK: Contacts added successfully.
+- 206 Partial Content: Some contacts added successfully, some failed
 - 400 Bad Request: Invalid request body. Please provide a valid JSON array of contacts.
 - 400 Bad Request: Cannot add more than 20 contacts at a time.
 - 400 Bad Request: Failed to create request for contact

@@ -29,6 +29,7 @@ func setupRouter() *mux.Router {
 	router := mux.NewRouter()
 	// C
 	router.HandleFunc("/addContact", func(w http.ResponseWriter, r *http.Request) { contacts.PutContact(w, r, repo) }).Methods("POST")
+	router.HandleFunc("/addContacts", func(w http.ResponseWriter, r *http.Request) { contacts.PutContacts(w, r, repo) }).Methods("POST")
 	// R
 	router.HandleFunc("/getContacts", func(w http.ResponseWriter, r *http.Request) { contacts.GetContacts(w, r, repo) }).Methods("GET")
 	// U
@@ -96,6 +97,91 @@ func testCreateContact(t *testing.T) {
 	resp, err = http.Post(testServer.URL+"/addContact", "application/json", bytes.NewBuffer(contactJSON))
 	assert.NoError(t, err)
 	assert.Equal(t, http.StatusOK, resp.StatusCode)
+}
+
+func TestPutContacts(t *testing.T) {
+	router := setupRouter()
+
+	// Define valid contacts
+	validContacts := []contacts.Contact{
+		{
+			FirstName: "John",
+			LastName:  "Doe",
+			Phone:     "+1234567890",
+			Address:   "123 Main St",
+		},
+		{
+			FirstName: "Jane",
+			LastName:  "Smith",
+			Phone:     "+9876543210",
+			Address:   "456 Elm St",
+		},
+		{
+			FirstName: "Emily",
+			LastName:  "Johnson",
+			Phone:     "+1122334455",
+			Address:   "789 Oak St",
+		},
+	}
+
+	// Define an invalid contact (missing FirstName and Phone)
+	invalidContact := contacts.Contact{
+		LastName: "Doe",
+		Address:  "No Address",
+	}
+
+	// Convert valid contacts to JSON
+	validContactsJSON, err := json.Marshal(validContacts)
+	assert.NoError(t, err)
+
+	// Test adding valid contacts
+	t.Run("AddValidContacts", func(t *testing.T) {
+		req, err := http.NewRequest("POST", "/addContacts", bytes.NewBuffer(validContactsJSON))
+		assert.NoError(t, err)
+
+		req.Header.Set("Content-Type", "application/json")
+		rr := httptest.NewRecorder()
+		router.ServeHTTP(rr, req)
+
+		assert.Equal(t, http.StatusOK, rr.Code)
+
+		var result map[string]interface{}
+		err = json.NewDecoder(rr.Body).Decode(&result)
+		assert.NoError(t, err)
+		assert.Equal(t, 3.0, result["successful_contacts"]) // JSON decoding converts numbers to float64
+		assert.Empty(t, result["failed_contacts"])
+	})
+	// If you don't reset the db then all of the contacts are invalid, since they're already in the DB
+	resetDatabase()
+	// Combine valid and invalid contacts for testing
+	mixedContacts := append(validContacts[:2], invalidContact)
+	mixedContactsJSON, err := json.Marshal(mixedContacts)
+	assert.NoError(t, err)
+
+	// // Test adding mixed valid and invalid contacts
+	t.Run("AddMixedContacts", func(t *testing.T) {
+		req, err := http.NewRequest("POST", "/addContacts", bytes.NewBuffer(mixedContactsJSON))
+		assert.NoError(t, err)
+
+		req.Header.Set("Content-Type", "application/json")
+		rr := httptest.NewRecorder()
+		router.ServeHTTP(rr, req)
+
+		assert.Equal(t, http.StatusPartialContent, rr.Code)
+
+		var result map[string]interface{}
+		err = json.NewDecoder(rr.Body).Decode(&result)
+		assert.NoError(t, err)
+		assert.Equal(t, 2.0, result["successful_contacts"]) // Two valid contacts should be added successfully
+		assert.NotEmpty(t, result["failed_contacts"])
+		assert.NotEmpty(t, result["errors"])
+
+		// Verify that the invalid contact caused the failure
+		failedContacts := result["failed_contacts"].([]interface{})
+		assert.Equal(t, 1, len(failedContacts))
+		failedContactJSON, _ := json.Marshal(invalidContact)
+		assert.Contains(t, string(failedContacts[0].(string)), string(failedContactJSON))
+	})
 }
 
 func testGetContact(t *testing.T) {

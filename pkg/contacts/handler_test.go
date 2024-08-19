@@ -411,7 +411,7 @@ func TestDeleteContact(t *testing.T) {
 				return errors.New("database error")
 			},
 			expectedStatusCode: http.StatusInternalServerError,
-			expectedResponse:   "Failed to delete contact",
+			expectedResponse:   "failed to delete contact",
 		},
 	}
 
