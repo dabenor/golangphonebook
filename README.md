@@ -24,13 +24,25 @@ Then you can access the application by sending CURL requests to [http://localhos
 
 ## Table of Contents
 
-1. [Endpoints](#endpoints)
+1. [Some Basic Constraints](#constraints)
+2. [Endpoints](#endpoints)
     - [Add Contact](#add-contact)
     - [Add Contacts](#add-contacts)
     - [Get Contacts](#get-contacts)
     - [Update Contact](#update-contact)
     - [Delete Contact](#delete-contact)
     - [Delete Contacts](#delete-contacts)
+  
+
+## Constraints
+
+    - first_name: Pretty open, needs to exist on any JSON calls to update or add a contact
+    - last_name: Pretty open, optional in most cases
+    - phone: An optional + sign followed by between 4 and 20 digits 0-9
+    - address: Pretty open, optional in most cases
+    - sort_by: only for getContacts function, can be first_name, last_name, or last_modified depedning on how you want to sort your results
+    - asc_dec: only for getContacts function, can be asc or dec depending on whether you want results to be ascending or descending, by default ascending, except for last_modified, which by default is descending (so you can see most recent contacts)
+    - page: only for getContacts function, used to tell the server what page of the results you want. If undefined or out of bounds due to a filter will automatically be set to 1
 
 ## Endpoints
 
@@ -44,7 +56,7 @@ Then you can access the application by sending CURL requests to [http://localhos
 
 #### Request Body
 
-- An array of JSON objects representing the contacts to add. Each object should include at least the 'first_name' and 'phone' fields. Optional fields that can also be populated later using an [Update Contact](#update-contact) call are 'last_name' and 'address'
+- An array of JSON objects representing the contacts to add. Each object should include at least the 'first_name' and 'phone' fields. Optional fields that can also be populated later using an [Update Contact](#update-contact) call are 'last_name' and 'address'. The first_name, last_name, and phone cannot be the same as a contact already in the database.
 
 **Example Request Body**:
 
@@ -58,9 +70,10 @@ Then you can access the application by sending CURL requests to [http://localhos
 ```
 
 **Responses:**
-200 OK: Contact added successfully.
-400 Bad Request: Invalid request body, first name and phone must be correctly defined.
-500 Internal Server Error: Failed to insert contact into the database.
+- 200 OK: Contact added successfully.
+- 400 Bad Request: Invalid request body, first name and phone must be correctly defined
+- 400 Bad Request: contact with the same full name and phone number already exists
+- 500 Internal Server Error: Failed to insert contact into the database.
 
 
 ### Add Contacts
@@ -89,3 +102,8 @@ Then you can access the application by sending CURL requests to [http://localhos
   }
 ]
 ```
+- 200 OK: Contacts added successfully.
+- 400 Bad Request: Invalid request body. Please provide a valid JSON array of contacts.
+- 400 Bad Request: Cannot add more than 20 contacts at a time.
+- 400 Bad Request: Failed to create request for contact
+- 400 Bad Request: Failed to create request for contact
