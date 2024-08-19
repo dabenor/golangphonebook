@@ -112,3 +112,138 @@ Then you can access the application by sending CURL requests to [https://localho
 - 400 Bad Request: Cannot add more than 20 contacts at a time.
 - 400 Bad Request: Failed to create request for contact
 - 400 Bad Request: Failed to create request for contact
+
+### Get Contacts
+
+- **Endpoint**: `/getContacts`
+- **Method**: GET
+- **Description**: Filter and Search through contacts in the Phonebook.
+
+#### Request Body
+
+- blank
+
+#### Parameters
+
+Filter Parameters
+- first_name
+- last_name
+- phone
+- address
+
+Pagination/Sorting Parameters
+- page (default value is 1, can be any value up to the number of pages for the filter)
+- sort_by ("first_name", "last_name" or "last_modified")
+- asc_dec ("asc" or "dec" for ascending or descending sort)
+
+**Example Request Parameters**:
+
+Request 1: Find the first page of contacts with names like John, sorted descending by first name. If you pass in page=2, and there is only 1 page of results, you will receive page 1
+first_name=john
+page=1
+sort_by=first_name
+asc_dec=dec
+
+Request 2: Find the people who live on main street, even without passing in a page parameter I will receive page 1 of the results
+address=main street
+
+- 200 OK: Contacts added successfully.
+- 400 Bad Request: Invalid request body. Please provide a valid JSON array of contacts.
+- 400 Bad Request: Cannot add more than 20 contacts at a time.
+- 400 Bad Request: Failed to create request for contact
+
+
+Response Format:
+You will receive an array of contacts, followed by pagination metadata. 
+- total_pages is the number of pages of contacts for the current query
+- current_page is the page of results returned to the client
+- total_count is the total number of records in the Phonebook that match the filters. That's only affected by adjusting the filter parameters
+```json
+{
+    "contacts": [
+        {
+            "id": 62,
+            "first_name": "Alice",
+            "last_name": "Wonderland",
+            "phone": "+3422220456",
+            "address": "456 Elm St",
+            "last_modified": "2024-08-18T23:02:29.101933Z"
+        },
+        {
+            "id": 63,
+            "first_name": "Bob",
+            "last_name": "Builder",
+            "phone": "+3422220789",
+            "address": "789 Maple St",
+            "last_modified": "2024-08-18T23:02:29.105321Z"
+        },
+        {
+            "id": 64,
+            "first_name": "Charlie",
+            "last_name": "Chaplin",
+            "phone": "+3422220110",
+            "address": "101 Oak St",
+            "last_modified": "2024-08-18T23:02:29.108775Z"
+        },
+        {
+            "id": 65,
+            "first_name": "Diana",
+            "last_name": "Prince",
+            "phone": "+3422220123",
+            "address": "123 Birch St",
+            "last_modified": "2024-08-18T23:02:29.112228Z"
+        },
+        {
+            "id": 66,
+            "first_name": "Eve",
+            "last_name": "Polastri",
+            "phone": "+3422220456",
+            "address": "456 Cedar St",
+            "last_modified": "2024-08-18T23:02:29.117805Z"
+        },
+        {
+            "id": 67,
+            "first_name": "Frank",
+            "last_name": "Castle",
+            "phone": "+3422220789",
+            "address": "789 Pine St",
+            "last_modified": "2024-08-18T23:02:29.123378Z"
+        },
+        {
+            "id": 68,
+            "first_name": "Grace",
+            "last_name": "Hopper",
+            "phone": "+3422220110",
+            "address": "101 Spruce St",
+            "last_modified": "2024-08-18T23:02:29.126691Z"
+        },
+        {
+            "id": 27,
+            "first_name": "Jane",
+            "last_name": "Smith",
+            "phone": "+1234567892",
+            "address": "456 Elm St",
+            "last_modified": "2024-08-18T20:56:15.443351Z"
+        },
+        {
+            "id": 69,
+            "first_name": "Jo",
+            "last_name": "Cena",
+            "phone": "+3422220123",
+            "address": "123 Main St",
+            "last_modified": "2024-08-18T23:04:05.977963Z"
+        },
+        {
+            "id": 26,
+            "first_name": "John",
+            "last_name": "Doe",
+            "phone": "+1234567891",
+            "address": "123 Main St",
+            "last_modified": "2024-08-18T20:55:37.381925Z"
+        }
+    ],
+    "total_pages": 5,
+    "current_page": 1,
+    "total_count": 41
+}
+```
